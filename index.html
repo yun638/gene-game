@@ -35,7 +35,9 @@
         .partner-card.selected { border-color: #ff4081; background: #fce4ec; }
         .partner-container { position: relative; width: 80px; height: 80px; margin: 10px auto; background: transparent !important; }
         button { padding: 12px 24px; margin: 5px; cursor: pointer; border-radius: 5px; border: none; background: #4CAF50; color: white; }
+        button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
         .breed-button { background: #ff4081; width: 100%; font-size: 18px; }
+        .breed-button:disabled { background: #ccc; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
         .modal-content { background: white; margin: 50px auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
     </style>
@@ -134,7 +136,17 @@
 
         // --- 88/6/2/4% 정밀 유전 로직 ---
         function breed() {
-            if (selectedPartnerIndex === null) return;
+            // 배우자 선택 여부 확인
+            if (selectedPartnerIndex === null || selectedPartnerIndex === undefined) {
+                alert("❌ 배우자를 먼저 선택해주세요!");
+                return;
+            }
+            
+            // 유효한 배우자인지 확인
+            if (!partners[selectedPartnerIndex]) {
+                alert("❌ 유효한 배우자를 선택해주세요!");
+                return;
+            }
 
             const pGenes = partners[selectedPartnerIndex];
             const currentFamily = familyTree[familyTree.length - 1];
@@ -187,7 +199,6 @@
             if (messages.length > 0) alert([...new Set(messages)].join('\n'));
             displayMyCharacter();
             generatePartners();
-            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999;">배우자 미선택</span>';
         }
 
         // --- 가계도 출력 (부모 얼굴 완벽 복구) ---
@@ -214,15 +225,22 @@
         // 배우자 생성 로직
         function generatePartners() {
             partners = Array.from({length: 6}, () => randomGenes());
+            selectedPartnerIndex = null; // 선택 초기화
+            
             const grid = document.getElementById('partnersGrid');
             grid.innerHTML = '';
+            
+            // 교배 버튼 비활성화 및 선택된 배우자 표시 초기화
+            document.getElementById('breedButton').disabled = true;
+            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999;">배우자 미선택</span>';
+            
             partners.forEach((p, i) => {
                 const card = document.createElement('div');
                 card.className = 'partner-card';
                 card.onclick = () => {
                     selectedPartnerIndex = i;
                     document.getElementById('selectedPartnerDisplay').innerHTML = getCharacterHTML(partners[i]);
-                    document.getElementById('breedButton').disabled = false;
+                    document.getElementById('breedButton').disabled = false; // 버튼 활성화
                     document.querySelectorAll('.partner-card').forEach(c => c.classList.remove('selected'));
                     card.classList.add('selected');
                 };
