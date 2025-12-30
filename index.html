@@ -10,7 +10,7 @@
         .container { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; width: 100%; box-sizing: border-box; }
         
         /* 캐릭터 표시 (Mask 방식) */
-        .character-container { position: relative; width: 120px; height: 120px; margin: 10px auto; background-color: transparent !important; }
+        .character-container { position: relative; width: 90px; height: 90px; margin: 10px auto; background-color: transparent !important; }
         .part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .body, .head {
             -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
@@ -29,7 +29,7 @@
 
         /* UI 요소 */
         .my-character-section { text-align: center; margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; }
-        .characters-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .characters-row { display: flex; align-items: center; justify-content: center; gap: 5px; }
         .partners-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .partner-card { padding: 10px; border: 2px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; background: white; }
         .partner-card.selected { border-color: #ff4081; background: #fce4ec; }
@@ -61,7 +61,7 @@
                     <div class="part head" id="myHeadPart"></div>
                     <img class="part eyes" id="myEyesPart">
                 </div>
-                <div style="font-size: 32px;">💕</div>
+                <div style="font-size: 24px;">💕</div>
                 <div class="character-container" id="selectedPartnerDisplay" style="border: 3px dashed #ff4081; display:flex; align-items:center; justify-content:center;">
                     <span style="color:#999;">배우자 미선택</span>
                 </div>
@@ -95,7 +95,7 @@
         const COLOR_NAMES = ['핑크', '민트', '스카이'];
 
         let myGenes = {};
-        let myName = "초대 캐릭터";
+        let myName = "초대 국왕";
         let generation = 1;
         let familyTree = [];
         let partners = [];
@@ -216,7 +216,7 @@
                             <div class="tree-character mini-char">${getCharacterHTML(m.parents.p2.genes)}</div>
                             <small>(${m.parents.p1.name} & ${m.parents.p2.name})</small>
                         </div>
-                    ` : '<br><small>초대 캐릭터</small>'}
+                    ` : '<br><small>초대 국왕</small>'}
                 </div>
             `).join('');
             document.getElementById('familyTreeModal').style.display = 'block';
