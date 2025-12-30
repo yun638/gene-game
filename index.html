@@ -6,11 +6,11 @@
     <title>진믹스</title>
     <style>
         /* 기본 레이아웃 */
-        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f0f0f0; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 800px; width: 100%; }
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; background-color: #f0f0f0; margin: 0; }
+        .container { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; width: 100%; box-sizing: border-box; }
         
         /* 캐릭터 표시 (Mask 방식) */
-        .character-container { position: relative; width: 200px; height: 200px; margin: 20px auto; background-color: transparent !important; }
+        .character-container { position: relative; width: 120px; height: 120px; margin: 10px auto; background-color: transparent !important; }
         .part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .body, .head {
             -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
@@ -28,15 +28,15 @@
         .mini-char { width: 40px; height: 40px; border: 1px solid #eee; position: relative; }
 
         /* UI 요소 */
-        .my-character-section { text-align: center; margin-bottom: 30px; padding: 20px; background: #e8f5e9; border-radius: 10px; }
-        .characters-row { display: flex; align-items: center; justify-content: center; gap: 20px; }
-        .partners-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
-        .partner-card { padding: 15px; border: 2px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; background: white; }
+        .my-character-section { text-align: center; margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; }
+        .characters-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .partners-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .partner-card { padding: 10px; border: 2px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; background: white; }
         .partner-card.selected { border-color: #ff4081; background: #fce4ec; }
-        .partner-container { position: relative; width: 80px; height: 80px; margin: 10px auto; background: transparent !important; }
-        button { padding: 12px 24px; margin: 5px; cursor: pointer; border-radius: 5px; border: none; background: #4CAF50; color: white; }
+        .partner-container { position: relative; width: 60px; height: 60px; margin: 5px auto; background: transparent !important; }
+        button { padding: 10px 16px; margin: 5px; cursor: pointer; border-radius: 5px; border: none; background: #4CAF50; color: white; font-size: 14px; }
         button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
-        .breed-button { background: #ff4081; width: 100%; font-size: 18px; }
+        .breed-button { background: #ff4081; width: 100%; font-size: 16px; margin-top: 10px; }
         .breed-button:disabled { background: #ccc; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
         .modal-content { background: white; margin: 50px auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
@@ -44,24 +44,24 @@
 </head>
 <body>
     <div class="container">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <h1>💕 진믹스</h1>
-            <div>
-                <button onclick="showFamilyTree()">🌳 가계도</button>
-                <button onclick="saveGame()" style="background:#666;">💾 저장</button>
-                <button onclick="loadGame()" style="background:#666;">📂 불러오기</button>
+        <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h1 style="margin: 0; font-size: 24px;">💕 진믹스</h1>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                <button onclick="showFamilyTree()" style="padding: 8px 12px; font-size: 14px;">🌳 가계도</button>
+                <button onclick="saveGame()" style="background:#666; padding: 8px 12px; font-size: 14px;">💾 저장</button>
+                <button onclick="loadGame()" style="background:#666; padding: 8px 12px; font-size: 14px;">📂 불러오기</button>
             </div>
         </div>
 
         <div class="my-character-section">
-            <div id="nameDisplay" onclick="changeName()" style="font-size:24px; font-weight:bold; cursor:pointer; color:#2e7d32;">이름 없음</div>
+            <div id="nameDisplay" onclick="changeName()" style="font-size:20px; font-weight:bold; cursor:pointer; color:#2e7d32;">이름 없음</div>
             <div class="characters-row">
                 <div class="character-container" id="myCharacter">
                     <div class="part body" id="myBodyPart"></div>
                     <div class="part head" id="myHeadPart"></div>
                     <img class="part eyes" id="myEyesPart">
                 </div>
-                <div style="font-size: 48px;">💕</div>
+                <div style="font-size: 32px;">💕</div>
                 <div class="character-container" id="selectedPartnerDisplay" style="border: 3px dashed #ff4081; display:flex; align-items:center; justify-content:center;">
                     <span style="color:#999;">배우자 미선택</span>
                 </div>
@@ -70,8 +70,8 @@
         </div>
 
         <div class="partners-section">
-            <h2>💝 배우자 후보</h2>
-            <button onclick="generatePartners()">🔄 새로운 후보 보기</button>
+            <h2 style="font-size: 18px; margin: 10px 0;">💝 배우자 후보</h2>
+            <button onclick="generatePartners()" style="width: 100%; margin-bottom: 10px;">🔄 새로운 후보 보기</button>
             <div class="partners-grid" id="partnersGrid"></div>
             <button class="breed-button" id="breedButton" onclick="breed()" disabled>👶 교배하기</button>
         </div>
@@ -224,7 +224,7 @@
 
         // 배우자 생성 로직
         function generatePartners() {
-            partners = Array.from({length: 6}, () => randomGenes());
+            partners = Array.from({length: 4}, () => randomGenes());
             selectedPartnerIndex = null; // 선택 초기화
             
             const grid = document.getElementById('partnersGrid');
@@ -244,7 +244,7 @@
                     document.querySelectorAll('.partner-card').forEach(c => c.classList.remove('selected'));
                     card.classList.add('selected');
                 };
-                card.innerHTML = `<div class="partner-container">${getCharacterHTML(p)}</div><div>후보 ${i+1}</div>`;
+                card.innerHTML = `<div class="partner-container">${getCharacterHTML(p)}</div><div style="font-size: 12px;">후보 ${i+1}</div>`;
                 grid.appendChild(card);
             });
         }
