@@ -21,11 +21,11 @@
         .eyes { z-index: 3; object-fit: contain; }
 
         /* 가계도 스타일 (부모님 얼굴 포함) */
-        .tree-node { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 12px; border-left: 5px solid #4CAF50; }
+        .tree-node { background: #f9f9f9; padding: 10px; margin: 10px 0; border-radius: 12px; border-left: 5px solid #4CAF50; }
         .tree-node-current { border-left-color: #ff4081; background: #fff4f7; }
-        .tree-character { display: inline-block; position: relative; width: 60px; height: 60px; border: 1px solid #ddd; vertical-align: middle; background: transparent; margin-right: 5px; }
-        .parent-visual-row { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding-top: 10px; border-top: 1px dashed #ccc; }
-        .mini-char { width: 40px; height: 40px; border: 1px solid #eee; position: relative; }
+        .tree-character { display: inline-block; position: relative; width: 50px; height: 50px; border: 1px solid #ddd; vertical-align: middle; background: transparent; margin-right: 5px; }
+        .parent-visual-row { margin-top: 8px; display: flex; align-items: center; gap: 5px; padding-top: 8px; border-top: 1px dashed #ccc; flex-wrap: wrap; font-size: 12px; }
+        .mini-char { width: 35px; height: 35px; border: 1px solid #eee; position: relative; }
 
         /* UI 요소 */
         .my-character-section { text-align: center; margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; }
@@ -39,7 +39,7 @@
         .breed-button { background: #ff4081; width: 100%; font-size: 16px; margin-top: 10px; }
         .breed-button:disabled { background: #ccc; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 50px auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: white; margin: 50px auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -86,7 +86,7 @@
     <div id="familyTreeModal" class="modal">
         <div class="modal-content">
             <span style="float:right; cursor:pointer; font-size:24px;" onclick="closeModal('familyTreeModal')">&times;</span>
-            <h2 style="display: flex; align-items: center; gap: 8px;">
+            <h2 style="display: flex; align-items: center; gap: 8px; font-size: 20px; margin: 0 0 15px 0;">
                 <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="28" style="vertical-align: middle;">
                 우리 가계도
             </h2>
@@ -215,17 +215,17 @@
             const content = document.getElementById('familyTreeContent');
             content.innerHTML = familyTree.map((m, idx) => `
                 <div class="tree-node ${idx === familyTree.length - 1 ? 'tree-node-current' : ''}">
-                    <strong>${m.generation}세대: ${m.name}</strong><br>
+                    <strong style="font-size: 14px;">${m.generation}세대: ${m.name}</strong><br>
                     <div class="tree-character">${getCharacterHTML(m.genes)}</div>
                     ${m.parents ? `
                         <div class="parent-visual-row">
-                            <small>부모:</small>
+                            <small style="white-space: nowrap;">부모:</small>
                             <div class="tree-character mini-char">${getCharacterHTML(m.parents.p1.genes)}</div>
                             <span>+</span>
                             <div class="tree-character mini-char">${getCharacterHTML(m.parents.p2.genes)}</div>
-                            <small>(${m.parents.p1.name} & ${m.parents.p2.name})</small>
+                            <small style="flex-shrink: 0;">(${m.parents.p1.name} & ${m.parents.p2.name})</small>
                         </div>
-                    ` : '<br><small>초대 국왕</small>'}
+                    ` : '<br><small style="font-size: 11px;">초대 국왕</small>'}
                 </div>
             `).join('');
             document.getElementById('familyTreeModal').style.display = 'block';
