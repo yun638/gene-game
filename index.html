@@ -60,6 +60,44 @@
             background: #e8f5e9;
             border-radius: 10px;
         }
+        .characters-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .character-box {
+            text-align: center;
+        }
+        .heart-emoji {
+            font-size: 48px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+        }
+        .selected-partner-box {
+            text-align: center;
+        }
+        .selected-partner-display {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border: 3px dashed #ff4081;
+            border-radius: 10px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .empty-partner {
+            color: #999;
+            font-size: 14px;
+            text-align: center;
+        }
         .name-display {
             font-size: 24px;
             font-weight: bold;
@@ -230,11 +268,30 @@
             <h2>내 캐릭터</h2>
             <div class="name-display" onclick="changeName()" id="nameDisplay">이름 없음</div>
             <div style="font-size: 12px; color: #666; margin-bottom: 10px;">(클릭해서 이름 변경)</div>
-            <div class="character-display" id="myCharacter">
-                <div class="part-layer body" id="myBodyPart"></div>
-                <div class="part-layer head" id="myHeadPart"></div>
-                <div class="part-layer eyes" id="myEyesPart"></div>
+            
+            <div class="characters-row">
+                <div class="character-box">
+                    <div class="character-display" id="myCharacter">
+                        <div class="part-layer body" id="myBodyPart"></div>
+                        <div class="part-layer head" id="myHeadPart"></div>
+                        <div class="part-layer eyes" id="myEyesPart"></div>
+                    </div>
+                </div>
+                
+                <div class="heart-emoji">💕</div>
+                
+                <div class="selected-partner-box">
+                    <div class="selected-partner-display" id="selectedPartnerDisplay">
+                        <div class="empty-partner">
+                            ⬇️ 아래에서<br>배우자를 선택하세요
+                        </div>
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                        <strong id="selectedPartnerLabel">배우자 미선택</strong>
+                    </div>
+                </div>
             </div>
+            
             <div class="info" id="myGenetics"></div>
             <div class="info">
                 <strong>세대:</strong> <span id="generation">1</span>
@@ -352,6 +409,15 @@
             }
             selectedPartnerIndex = null;
             document.getElementById('breedButton').disabled = true;
+            
+            // 오른쪽 박스 초기화
+            document.getElementById('selectedPartnerDisplay').innerHTML = `
+                <div class="empty-partner">
+                    ⬇️ 아래에서<br>배우자를 선택하세요
+                </div>
+            `;
+            document.getElementById('selectedPartnerLabel').textContent = '배우자 미선택';
+            
             displayPartners();
         }
 
@@ -396,6 +462,14 @@
         function selectPartner(index) {
             selectedPartnerIndex = index;
             document.getElementById('breedButton').disabled = false;
+            
+            // 선택된 배우자를 오른쪽 박스에 표시
+            const partnerGenes = partners[index];
+            const displayDiv = document.getElementById('selectedPartnerDisplay');
+            displayDiv.innerHTML = getCharacterHTML(partnerGenes, 'normal');
+            
+            document.getElementById('selectedPartnerLabel').textContent = `후보 ${index + 1} 선택됨`;
+            
             displayPartners();
         }
 
@@ -436,7 +510,7 @@
             // 자식이 새로운 내 캐릭터가 됨
             myGenes = childGenes;
             generation++;
-            myName = "새끼";
+            myName = "아가";
             
             // 가계도에 추가
             familyTree.push({
