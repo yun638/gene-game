@@ -222,9 +222,16 @@
             const childGenes = {};
             const messages = [];
 
+            // 파츠 이름을 한글로 변환하는 함수
+            const partToKorean = (part) => {
+                const partNames = { body: '몸', head: '머리', eyes: '눈', color: '색깔' };
+                return partNames[part] || part;
+            };
+
             ['body', 'head', 'eyes', 'color'].forEach(part => {
                 const maxValue = part === 'color' ? GENE_CONFIG.color.count : GENE_CONFIG[part].count;
                 const rand = Math.random() * 100;
+                const partKR = partToKorean(part);
                 
                 if (rand < 88) { // 88% 부모
                     childGenes[part] = Math.random() < 0.5 ? myGenes[part] : pGenes[part];
@@ -232,19 +239,39 @@
                     childGenes[part] = grandparents[Math.floor(Math.random() * 2)][part];
                     // 현재 캐릭터 또는 배우자와 다른 형질일 때만 메시지 표시
                     if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                        messages.push(`👴👵 조부모의 ${part} 유전!`);
+                        messages.push(`👴👵 할아버지 할머니의 ${partKR} 유전!`);
                     }
                 } else if (rand < 96 && greatGrandparents) { // 2% 증조부모
                     childGenes[part] = greatGrandparents[Math.floor(Math.random() * 2)][part];
                     // 현재 캐릭터 또는 배우자와 다른 형질일 때만 메시지 표시
                     if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                        messages.push(`👵👴 증조부모의 ${part} 유전!`);
+                        messages.push(`👵👴 증조할아버지 증조할머니의 ${partKR} 유전!`);
                     }
-                } else { // 4% 돌연변이
+                } else if (rand < 97) { // 1% 고조부모 (새로 추가!)
+                    // 고조부모 데이터 확보
+                    let greatGreatGrandparents = null;
+                    if (familyTree.length >= 3) {
+                        const ggParentGen = familyTree[familyTree.length - 3];
+                        if (ggParentGen.parents) greatGreatGrandparents = [ggParentGen.parents.p1.genes, ggParentGen.parents.p2.genes];
+                    }
+                    
+                    if (greatGreatGrandparents) {
+                        childGenes[part] = greatGreatGrandparents[Math.floor(Math.random() * 2)][part];
+                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
+                            messages.push(`🎩 무려 고조할아버지 고조할머니의 ${partKR} 유전!`);
+                        }
+                    } else {
+                        // 고조부모가 없으면 돌연변이로 처리
+                        childGenes[part] = Math.floor(Math.random() * maxValue);
+                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
+                            messages.push(`✨ ${partKR} 돌연변이 발생!`);
+                        }
+                    }
+                } else { // 3% 돌연변이 (기존 4%에서 1% 감소)
                     childGenes[part] = Math.floor(Math.random() * maxValue);
                     // 현재 캐릭터 또는 배우자와 다른 형질일 때만 메시지 표시
                     if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                        messages.push(`✨ ${part} 돌연변이 발생!`);
+                        messages.push(`✨ ${partKR} 돌연변이 발생!`);
                     }
                 }
             });
