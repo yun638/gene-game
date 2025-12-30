@@ -49,13 +49,9 @@
                 <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="30" style="vertical-align: middle;">
                 진믹스
             </h1>
-            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button onclick="showFamilyTree()" style="padding: 8px 12px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="20" style="vertical-align: middle;"> 가계도
-                </button>
-                <button onclick="saveGame()" style="background:#666; padding: 8px 12px; font-size: 14px;">💾 저장</button>
-                <button onclick="loadGame()" style="background:#666; padding: 8px 12px; font-size: 14px;">📂 불러오기</button>
-            </div>
+            <button onclick="showFamilyTree()" style="padding: 8px 12px; font-size: 14px; display: flex; align-items: center; gap: 5px; margin-left: auto;">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="20" style="vertical-align: middle;"> 가계도
+            </button>
         </div>
 
         <div class="my-character-section">
@@ -68,18 +64,20 @@
                 </div>
                 <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="40" alt="하트">
                 <div class="character-container" id="selectedPartnerDisplay" style="border: 3px dashed #ff4081; display:flex; align-items:center; justify-content:center;">
-                    <span style="color:#999;">배우자 미선택</span>
+                    <span style="color:#999; text-align: center; line-height: 1.4;">배우자<br><br>미선택</span>
                 </div>
             </div>
             <div class="info">현재 세대: <span id="generation">1</span></div>
         </div>
 
         <div class="partners-section">
-            <h2 style="font-size: 18px; margin: 10px 0; display: flex; align-items: center; gap: 8px;">
-                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Yellow%20heart/3D/yellow_heart_3d.png" width="24" style="vertical-align: middle;">
-                배우자 후보
-            </h2>
-            <button onclick="generatePartners()" style="width: 100%; margin-bottom: 10px;">🔄 새로운 후보 보기</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
+                <h2 style="font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Yellow%20heart/3D/yellow_heart_3d.png" width="24" style="vertical-align: middle;">
+                    배우자 후보
+                </h2>
+                <button onclick="generatePartners()" style="padding: 6px 12px; font-size: 13px; margin: 0;">새로운 후보</button>
+            </div>
             <div class="partners-grid" id="partnersGrid"></div>
             <button class="breed-button" id="breedButton" onclick="breed()" disabled>👶 교배하기</button>
         </div>
@@ -243,7 +241,7 @@
             
             // 교배 버튼 비활성화 및 선택된 배우자 표시 초기화
             document.getElementById('breedButton').disabled = true;
-            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999;">배우자 미선택</span>';
+            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999; text-align: center; line-height: 1.4;">배우자<br><br>미선택</span>';
             
             partners.forEach((p, i) => {
                 const card = document.createElement('div');
