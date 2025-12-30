@@ -248,6 +248,16 @@
                 }
             });
 
+            // 부모와 완전히 동일한지 확인
+            const isIdenticalToMe = ['body', 'head', 'eyes', 'color'].every(part => childGenes[part] === myGenes[part]);
+            const isIdenticalToPartner = ['body', 'head', 'eyes', 'color'].every(part => childGenes[part] === pGenes[part]);
+            
+            if (isIdenticalToMe) {
+                messages.unshift(`💕 나와 똑 닮았네! (4% 미만)`);
+            } else if (isIdenticalToPartner) {
+                messages.unshift(`💕 배우자와 똑 닮았네! (4% 미만)`);
+            }
+
             const oldName = myName;
             const oldGenes = {...myGenes};
             myGenes = childGenes;
@@ -357,5 +367,3 @@
     </script>
 </body>
 </html>
-
-
