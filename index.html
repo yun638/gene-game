@@ -30,29 +30,37 @@
             padding: 8px 16px;
             font-size: 14px;
         }
-        .character-display {
+        .character-container {
             position: relative;
             width: 200px;
             height: 200px;
             margin: 20px auto;
             border: 3px solid #333;
             border-radius: 10px;
-            background: #fff;
+            transition: background-color 0.3s ease;
         }
-        .part-layer {
+        .part {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
+        }
+        .body, .head {
+            background-color: inherit;
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
         }
         .body { z-index: 1; }
         .head { z-index: 2; }
-        .eyes { z-index: 3; }
+        .eyes { 
+            z-index: 3;
+            object-fit: contain;
+        }
         .my-character-section {
             text-align: center;
             margin-bottom: 30px;
@@ -88,10 +96,10 @@
             margin: 20px auto;
             border: 3px dashed #ff4081;
             border-radius: 10px;
-            background: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background-color 0.3s ease;
         }
         .empty-partner {
             color: #999;
@@ -144,17 +152,18 @@
             border-color: #ff4081;
             background: #fce4ec;
         }
-        .partner-display {
+        .partner-container {
             position: relative;
             width: 100px;
             height: 100px;
             margin: 10px auto;
             border: 2px solid #666;
             border-radius: 5px;
-            background: #fff;
+            transition: background-color 0.3s ease;
         }
-        .partner-display .part-layer {
-            font-size: 30px;
+        .partner-container .part {
+            width: 100%;
+            height: 100%;
         }
         button {
             padding: 12px 24px;
@@ -216,9 +225,6 @@
         .modal-close:hover {
             color: #000;
         }
-        .family-tree {
-            margin-top: 20px;
-        }
         .tree-node {
             background: #f5f5f5;
             padding: 15px;
@@ -238,19 +244,12 @@
             margin: 5px;
             border: 2px solid #666;
             border-radius: 5px;
-            background: #fff;
             vertical-align: middle;
+            transition: background-color 0.3s ease;
         }
-        .tree-character .part-layer {
-            font-size: 20px;
-        }
-        input[type="text"] {
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
+        .tree-character .part {
             width: 100%;
-            margin: 10px 0;
+            height: 100%;
         }
     </style>
 </head>
@@ -271,10 +270,10 @@
             
             <div class="characters-row">
                 <div class="character-box">
-                    <div class="character-display" id="myCharacter">
-                        <div class="part-layer body" id="myBodyPart"></div>
-                        <div class="part-layer head" id="myHeadPart"></div>
-                        <div class="part-layer eyes" id="myEyesPart"></div>
+                    <div class="character-container" id="myCharacter">
+                        <div class="part body" id="myBodyPart"></div>
+                        <div class="part head" id="myHeadPart"></div>
+                        <img class="part eyes" id="myEyesPart">
                     </div>
                 </div>
                 
@@ -321,21 +320,15 @@
     </div>
 
     <script>
-        // 유전자 옵션 정의
-        // 이미지 경로 (GitHub에 올린 후 전체 URL로 변경 가능)
+        // 유전자 옵션 정의 (마스크 이미지 경로)
         const GENES = {
             body: ['images/body_0.png', 'images/body_1.png', 'images/body_2.png', 'images/body_3.png'],
             head: ['images/head_0.png', 'images/head_1.png', 'images/head_2.png', 'images/head_3.png'],
             eyes: ['images/eyes_0.png', 'images/eyes_1.png', 'images/eyes_2.png', 'images/eyes_3.png']
         };
 
-        // 색상 옵션 (몸통과 머리는 항상 같은 색)
-        const COLORS = [
-            'sepia(0.3) saturate(3) hue-rotate(320deg) brightness(1.1)',     // 0: 연한 핑크
-            'sepia(0.2) saturate(2.5) hue-rotate(80deg) brightness(1.15)',   // 1: 연한 민트
-            'sepia(0.2) saturate(2.5) hue-rotate(180deg) brightness(1.15)'   // 2: 연한 스카이
-        ];
-
+        // 색상 옵션 (정확한 hex 값)
+        const COLORS = ['#ffd2d2', '#c1e2bd', '#bcdff1'];
         const COLOR_NAMES = ['핑크', '민트', '스카이'];
 
         // 게임 상태
@@ -343,7 +336,7 @@
             body: Math.floor(Math.random() * GENES.body.length),
             head: Math.floor(Math.random() * GENES.head.length),
             eyes: Math.floor(Math.random() * GENES.eyes.length),
-            color: Math.floor(Math.random() * COLORS.length) // 몸통과 머리 공통 색상
+            color: Math.floor(Math.random() * COLORS.length)
         };
 
         let myName = "이름 없음";
@@ -366,9 +359,17 @@
 
         // 내 캐릭터 표시
         function displayMyCharacter() {
-            document.getElementById('myBodyPart').innerHTML = `<img src="${GENES.body[myGenes.body]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[myGenes.color]};">`;
-            document.getElementById('myHeadPart').innerHTML = `<img src="${GENES.head[myGenes.head]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[myGenes.color]};">`;
-            document.getElementById('myEyesPart').innerHTML = `<img src="${GENES.eyes[myGenes.eyes]}" style="width: 100%; height: 100%; object-fit: contain;">`;
+            const container = document.getElementById('myCharacter');
+            container.style.backgroundColor = COLORS[myGenes.color];
+            
+            document.getElementById('myBodyPart').style.webkitMaskImage = `url('${GENES.body[myGenes.body]}')`;
+            document.getElementById('myBodyPart').style.maskImage = `url('${GENES.body[myGenes.body]}')`;
+            
+            document.getElementById('myHeadPart').style.webkitMaskImage = `url('${GENES.head[myGenes.head]}')`;
+            document.getElementById('myHeadPart').style.maskImage = `url('${GENES.head[myGenes.head]}')`;
+            
+            document.getElementById('myEyesPart').src = GENES.eyes[myGenes.eyes];
+            
             document.getElementById('nameDisplay').textContent = myName;
         }
 
@@ -407,18 +408,24 @@
                     ⬇️ 아래에서<br>배우자를 선택하세요
                 </div>
             `;
+            document.getElementById('selectedPartnerDisplay').style.backgroundColor = 'transparent';
             document.getElementById('selectedPartnerLabel').textContent = '배우자 미선택';
             
             displayPartners();
         }
 
         // 캐릭터 HTML 생성 함수
-        function getCharacterHTML(genes, size = 'normal') {
-            const sizeStyle = size === 'small' ? 'font-size: 20px;' : '';
+        function getCharacterHTML(genes) {
             return `
-                <div class="part-layer body"><img src="${GENES.body[genes.body]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[genes.color]};"></div>
-                <div class="part-layer head"><img src="${GENES.head[genes.head]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[genes.color]};"></div>
-                <div class="part-layer eyes"><img src="${GENES.eyes[genes.eyes]}" style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="part body" style="
+                    -webkit-mask-image: url('${GENES.body[genes.body]}');
+                    mask-image: url('${GENES.body[genes.body]}');
+                "></div>
+                <div class="part head" style="
+                    -webkit-mask-image: url('${GENES.head[genes.head]}');
+                    mask-image: url('${GENES.head[genes.head]}');
+                "></div>
+                <img src="${GENES.eyes[genes.eyes]}" class="part eyes">
             `;
         }
 
@@ -436,14 +443,18 @@
                 
                 card.onclick = () => selectPartner(index);
                 
-                card.innerHTML = `
-                    <div class="partner-display">
-                        ${getCharacterHTML(partnerGenes, 'small')}
-                    </div>
-                    <div style="font-size: 12px; color: #666;">
-                        후보 ${index + 1}
-                    </div>
-                `;
+                const containerDiv = document.createElement('div');
+                containerDiv.className = 'partner-container';
+                containerDiv.style.backgroundColor = COLORS[partnerGenes.color];
+                containerDiv.innerHTML = getCharacterHTML(partnerGenes);
+                
+                card.appendChild(containerDiv);
+                
+                const label = document.createElement('div');
+                label.style.fontSize = '12px';
+                label.style.color = '#666';
+                label.textContent = `후보 ${index + 1}`;
+                card.appendChild(label);
                 
                 grid.appendChild(card);
             });
@@ -457,7 +468,8 @@
             // 선택된 배우자를 오른쪽 박스에 표시
             const partnerGenes = partners[index];
             const displayDiv = document.getElementById('selectedPartnerDisplay');
-            displayDiv.innerHTML = getCharacterHTML(partnerGenes, 'normal');
+            displayDiv.style.backgroundColor = COLORS[partnerGenes.color];
+            displayDiv.innerHTML = getCharacterHTML(partnerGenes);
             
             document.getElementById('selectedPartnerLabel').textContent = `후보 ${index + 1} 선택됨`;
             
@@ -581,44 +593,64 @@
                     const nodeDiv = document.createElement('div');
                     nodeDiv.className = isCurrentGen ? 'tree-node tree-node-current' : 'tree-node';
                     
+                    const characterDiv = document.createElement('div');
+                    characterDiv.className = 'tree-character';
+                    characterDiv.style.backgroundColor = COLORS[member.genes.color];
+                    characterDiv.innerHTML = getCharacterHTML(member.genes);
+                    
                     let html = `
                         <strong>${member.generation}세대: ${member.name}</strong>
                         ${isCurrentGen ? ' (현재)' : ''}
                         <br>
-                        <div class="tree-character">
-                            ${getCharacterHTML(member.genes, 'small')}
-                        </div>
-                        <span style="font-size: 12px; color: #666;">
-                            색상: ${COLOR_NAMES[member.genes.color]} | 
-                            몸통: 타입${member.genes.body} | 
-                            머리: 타입${member.genes.head} | 
-                            눈: 타입${member.genes.eyes}
-                        </span>
                     `;
                     
+                    nodeDiv.innerHTML = html;
+                    nodeDiv.appendChild(characterDiv);
+                    
+                    const infoSpan = document.createElement('span');
+                    infoSpan.style.fontSize = '12px';
+                    infoSpan.style.color = '#666';
+                    infoSpan.textContent = `색상: ${COLOR_NAMES[member.genes.color]} | 몸통: 타입${member.genes.body} | 머리: 타입${member.genes.head} | 눈: 타입${member.genes.eyes}`;
+                    nodeDiv.appendChild(infoSpan);
+                    
                     if (member.parents) {
-                        html += `
-                            <br><br>
-                            <div style="font-size: 14px; color: #666;">
-                                <strong>부모:</strong><br>
-                                <div style="display: inline-block; margin: 5px;">
-                                    ${member.parents.parent1.name}
-                                    <div class="tree-character">
-                                        ${getCharacterHTML(member.parents.parent1.genes, 'small')}
-                                    </div>
-                                </div>
-                                +
-                                <div style="display: inline-block; margin: 5px;">
-                                    ${member.parents.parent2.name}
-                                    <div class="tree-character">
-                                        ${getCharacterHTML(member.parents.parent2.genes, 'small')}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                        const parentsDiv = document.createElement('div');
+                        parentsDiv.style.fontSize = '14px';
+                        parentsDiv.style.color = '#666';
+                        parentsDiv.style.marginTop = '10px';
+                        parentsDiv.innerHTML = '<strong>부모:</strong><br>';
+                        
+                        // 부모 1
+                        const parent1Container = document.createElement('div');
+                        parent1Container.style.display = 'inline-block';
+                        parent1Container.style.margin = '5px';
+                        parent1Container.innerHTML = member.parents.parent1.name;
+                        
+                        const parent1Char = document.createElement('div');
+                        parent1Char.className = 'tree-character';
+                        parent1Char.style.backgroundColor = COLORS[member.parents.parent1.genes.color];
+                        parent1Char.innerHTML = getCharacterHTML(member.parents.parent1.genes);
+                        parent1Container.appendChild(parent1Char);
+                        
+                        parentsDiv.appendChild(parent1Container);
+                        parentsDiv.appendChild(document.createTextNode(' + '));
+                        
+                        // 부모 2
+                        const parent2Container = document.createElement('div');
+                        parent2Container.style.display = 'inline-block';
+                        parent2Container.style.margin = '5px';
+                        parent2Container.innerHTML = member.parents.parent2.name;
+                        
+                        const parent2Char = document.createElement('div');
+                        parent2Char.className = 'tree-character';
+                        parent2Char.style.backgroundColor = COLORS[member.parents.parent2.genes.color];
+                        parent2Char.innerHTML = getCharacterHTML(member.parents.parent2.genes);
+                        parent2Container.appendChild(parent2Char);
+                        
+                        parentsDiv.appendChild(parent2Container);
+                        nodeDiv.appendChild(parentsDiv);
                     }
                     
-                    nodeDiv.innerHTML = html;
                     content.appendChild(nodeDiv);
                 });
             }
