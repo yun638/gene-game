@@ -48,7 +48,7 @@
             height: 100%;
         }
         .body, .head {
-            background: inherit;
+            background-color: inherit;
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
@@ -366,15 +366,24 @@
             const container = document.getElementById('myCharacter');
             container.style.backgroundColor = COLORS[myGenes.color];
             
-            document.getElementById('myBodyPart').style.webkitMaskImage = `url('${GENES.body[myGenes.body]}')`;
-            document.getElementById('myBodyPart').style.maskImage = `url('${GENES.body[myGenes.body]}')`;
+            const bodyPart = document.getElementById('myBodyPart');
+            bodyPart.style.webkitMaskImage = `url('${GENES.body[myGenes.body]}')`;
+            bodyPart.style.maskImage = `url('${GENES.body[myGenes.body]}')`;
+            bodyPart.style.backgroundColor = COLORS[myGenes.color];
             
-            document.getElementById('myHeadPart').style.webkitMaskImage = `url('${GENES.head[myGenes.head]}')`;
-            document.getElementById('myHeadPart').style.maskImage = `url('${GENES.head[myGenes.head]}')`;
+            const headPart = document.getElementById('myHeadPart');
+            headPart.style.webkitMaskImage = `url('${GENES.head[myGenes.head]}')`;
+            headPart.style.maskImage = `url('${GENES.head[myGenes.head]}')`;
+            headPart.style.backgroundColor = COLORS[myGenes.color];
             
             document.getElementById('myEyesPart').src = GENES.eyes[myGenes.eyes];
             
             document.getElementById('nameDisplay').textContent = myName;
+            
+            // 디버깅용
+            console.log('Body mask:', GENES.body[myGenes.body]);
+            console.log('Head mask:', GENES.head[myGenes.head]);
+            console.log('Color:', COLORS[myGenes.color]);
         }
 
         // 이름 변경
