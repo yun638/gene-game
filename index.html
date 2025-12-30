@@ -45,9 +45,14 @@
 <body>
     <div class="container">
         <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h1 style="margin: 0; font-size: 24px;">💕 진믹스</h1>
+            <h1 style="margin: 0; font-size: 24px; display: flex; align-items: center; gap: 8px;">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/DNA/3D/dna_3d.png" width="30" style="vertical-align: middle;">
+                진믹스
+            </h1>
             <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button onclick="showFamilyTree()" style="padding: 8px 12px; font-size: 14px;">🌳 가계도</button>
+                <button onclick="showFamilyTree()" style="padding: 8px 12px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="20" style="vertical-align: middle;"> 가계도
+                </button>
                 <button onclick="saveGame()" style="background:#666; padding: 8px 12px; font-size: 14px;">💾 저장</button>
                 <button onclick="loadGame()" style="background:#666; padding: 8px 12px; font-size: 14px;">📂 불러오기</button>
             </div>
@@ -61,7 +66,7 @@
                     <div class="part head" id="myHeadPart"></div>
                     <img class="part eyes" id="myEyesPart">
                 </div>
-                <div style="font-size: 24px;">💕</div>
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="40" alt="하트">
                 <div class="character-container" id="selectedPartnerDisplay" style="border: 3px dashed #ff4081; display:flex; align-items:center; justify-content:center;">
                     <span style="color:#999;">배우자 미선택</span>
                 </div>
@@ -70,7 +75,10 @@
         </div>
 
         <div class="partners-section">
-            <h2 style="font-size: 18px; margin: 10px 0;">💝 배우자 후보</h2>
+            <h2 style="font-size: 18px; margin: 10px 0; display: flex; align-items: center; gap: 8px;">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Yellow%20heart/3D/yellow_heart_3d.png" width="24" style="vertical-align: middle;">
+                배우자 후보
+            </h2>
             <button onclick="generatePartners()" style="width: 100%; margin-bottom: 10px;">🔄 새로운 후보 보기</button>
             <div class="partners-grid" id="partnersGrid"></div>
             <button class="breed-button" id="breedButton" onclick="breed()" disabled>👶 교배하기</button>
@@ -80,7 +88,10 @@
     <div id="familyTreeModal" class="modal">
         <div class="modal-content">
             <span style="float:right; cursor:pointer; font-size:24px;" onclick="closeModal('familyTreeModal')">&times;</span>
-            <h2>🌳 우리 가계도</h2>
+            <h2 style="display: flex; align-items: center; gap: 8px;">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="28" style="vertical-align: middle;">
+                우리 가계도
+            </h2>
             <div id="familyTreeContent"></div>
         </div>
     </div>
