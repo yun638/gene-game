@@ -67,7 +67,7 @@
                 </div>
                 <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="40" alt="하트">
                 <div class="character-container" id="selectedPartnerDisplay" style="border: 3px dashed #ff4081; display:flex; align-items:center; justify-content:center;">
-                    <span style="color:#999; text-align: center; line-height: 1.4;">배우자<br><br>미선택</span>
+                    <span style="color:#999; text-align: center; line-height: 1.4;">배우자<br>미선택</span>
                 </div>
             </div>
             <div class="info">현재 세대: <span id="generation">1</span></div>
@@ -111,6 +111,7 @@
         let myGenes = {};
         let myName = "초대 국왕";
         let generation = 1;
+        let babyCounter = 1; // 아가 번호 카운터
         let familyTree = [];
         let partners = [];
         let selectedPartnerIndex = null;
@@ -253,15 +254,16 @@
             const isIdenticalToPartner = ['body', 'head', 'eyes', 'color'].every(part => childGenes[part] === pGenes[part]);
             
             if (isIdenticalToMe) {
-                messages.unshift(`💕 나와 똑 닮았네! (4% 미만)`);
+                messages.unshift(`💕 나와 똑 닮았네!`);
             } else if (isIdenticalToPartner) {
-                messages.unshift(`💕 배우자와 똑 닮았네! (4% 미만)`);
+                messages.unshift(`💕 배우자와 똑 닮았네!`);
             }
 
             const oldName = myName;
             const oldGenes = {...myGenes};
             myGenes = childGenes;
-            myName = "새 아가";
+            myName = `아가${babyCounter}`;
+            babyCounter++; // 번호 증가
             generation++;
 
             familyTree.push({
@@ -307,7 +309,7 @@
             grid.innerHTML = '';
             
             document.getElementById('breedButton').disabled = true;
-            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999; text-align: center; line-height: 1.4;">배우자<br><br>미선택</span>';
+            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999; text-align: center; line-height: 1.4;">배우자<br>미선택</span>';
             
             partners.forEach((p, i) => {
                 const card = document.createElement('div');
@@ -345,7 +347,7 @@
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
         function saveGame() {
-            const data = JSON.stringify({ myGenes, myName, generation, familyTree });
+            const data = JSON.stringify({ myGenes, myName, generation, familyTree, babyCounter });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(new Blob([data], {type: 'application/json'}));
             a.download = `진믹스_세이브_${myName}.json`; a.click();
@@ -357,8 +359,14 @@
                 const reader = new FileReader();
                 reader.onload = ev => {
                     const d = JSON.parse(ev.target.result);
-                    myGenes = d.myGenes; myName = d.myName; generation = d.generation; familyTree = d.familyTree;
-                    displayMyCharacter(); generatePartners(); alert("복구 성공!");
+                    myGenes = d.myGenes; 
+                    myName = d.myName; 
+                    generation = d.generation; 
+                    familyTree = d.familyTree;
+                    babyCounter = d.babyCounter || 1; // 이전 저장 파일 호환성
+                    displayMyCharacter(); 
+                    generatePartners(); 
+                    alert("복구 성공!");
                 };
                 reader.readAsText(e.target.files[0]);
             };
