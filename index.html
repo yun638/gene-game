@@ -177,13 +177,22 @@
                     childGenes[part] = Math.random() < 0.5 ? myGenes[part] : pGenes[part];
                 } else if (rand < 94 && grandparents) { // 6% 조부모
                     childGenes[part] = grandparents[Math.floor(Math.random() * 2)][part];
-                    messages.push(`👴👵 조부모의 ${part} 유전!`);
+                    // 현재 캐릭터와 다른 형질일 때만 메시지 표시
+                    if (childGenes[part] !== myGenes[part]) {
+                        messages.push(`👴👵 조부모의 ${part} 유전!`);
+                    }
                 } else if (rand < 96 && greatGrandparents) { // 2% 증조부모
                     childGenes[part] = greatGrandparents[Math.floor(Math.random() * 2)][part];
-                    messages.push(`👵👴 증조부모의 ${part} 유전!`);
+                    // 현재 캐릭터와 다른 형질일 때만 메시지 표시
+                    if (childGenes[part] !== myGenes[part]) {
+                        messages.push(`👵👴 증조부모의 ${part} 유전!`);
+                    }
                 } else { // 4% 돌연변이
                     childGenes[part] = Math.floor(Math.random() * (part === 'color' ? 3 : 4));
-                    messages.push(`✨ ${part} 돌연변이 발생!`);
+                    // 현재 캐릭터와 다른 형질일 때만 메시지 표시
+                    if (childGenes[part] !== myGenes[part]) {
+                        messages.push(`✨ ${part} 돌연변이 발생!`);
+                    }
                 }
             });
 
