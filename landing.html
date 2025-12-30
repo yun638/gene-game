@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진믹스 - 10번째 아가를 찾아서</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .landing-container {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+        
+        .rules {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .rules h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: #764ba2;
+            text-align: center;
+        }
+        
+        .rule-item {
+            margin: 12px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 15px;
+            color: #444;
+            line-height: 1.6;
+        }
+        
+        .rule-item:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .input-section {
+            margin-bottom: 25px;
+        }
+        
+        .input-section label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        
+        .input-section input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        
+        .input-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .start-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .start-button:active {
+            transform: translateY(0);
+        }
+        
+        .start-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .highlight {
+            color: #ff4081;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <div class="title">
+            <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="40">
+            진믹스
+        </div>
+        
+        <div class="subtitle">
+            <span class="highlight">10번째 아가</span>는<br>당신의 행운 아가입니다 🍀
+        </div>
+        
+        <div class="rules">
+            <h3>🎮 게임 룰</h3>
+            <div class="rule-item">아가는 하나씩 태어나요</div>
+            <div class="rule-item">9번은 스쳐 지나가고</div>
+            <div class="rule-item"><span class="highlight">10번째 아가</span>만 내 품으로 와요</div>
+        </div>
+        
+        <div class="input-section">
+            <label for="userName">이름을 입력해주세요</label>
+            <input type="text" id="userName" placeholder="예: 홍길동" maxlength="10">
+        </div>
+        
+        <button class="start-button" onclick="startGame()">🎯 시작하기</button>
+    </div>
+    
+    <script>
+        // Enter 키로도 시작 가능
+        document.getElementById('userName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startGame();
+            }
+        });
+        
+        function startGame() {
+            const userName = document.getElementById('userName').value.trim();
+            
+            if (!userName) {
+                alert('이름을 입력해주세요! 😊');
+                document.getElementById('userName').focus();
+                return;
+            }
+            
+            // 로컬 스토리지에 유저 이름 저장
+            localStorage.setItem('jinmix_userName', userName);
+            
+            // 게임 데이터 초기화
+            localStorage.removeItem('jinmix_gameData');
+            
+            // 게임 페이지로 이동
+            window.location.href = 'game.html';
+        }
+    </script>
+</body>
+</html>
