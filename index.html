@@ -58,7 +58,7 @@
         </div>
 
         <div class="my-character-section">
-            <div id="nameDisplay" onclick="changeName()" style="font-size:20px; font-weight:bold; cursor:pointer; color:#2e7d32;">이름 없음</div>
+            <div id="nameDisplay" onclick="changeName()" style="font-size:20px; font-weight:bold; cursor:pointer; color:#2e7d32; margin-bottom: 10px;">이름 없음</div>
             <div class="characters-row">
                 <div class="character-container" id="myCharacter">
                     <div class="part body" id="myBodyPart"></div>
@@ -70,7 +70,7 @@
                     <span style="color:#999; text-align: center; line-height: 1.4;">배우자<br>미선택</span>
                 </div>
             </div>
-            <div class="info">현재 세대: <span id="generation">1</span></div>
+            <div class="info" style="margin-top: 10px;">현재 세대: <span id="generation">1</span></div>
         </div>
 
         <div class="partners-section">
@@ -109,9 +109,9 @@
 
         let GENES = {}; // 동적으로 생성됨
         let myGenes = {};
-        let myName = "초대 국왕";
+        let myName = "초대 국왕 - 아가1";
         let generation = 1;
-        let babyCounter = 1; // 아가 번호 카운터
+        let babyCounter = 2; // 아가 번호 카운터 (다음은 아가2부터)
         let familyTree = [];
         let partners = [];
         let selectedPartnerIndex = null;
@@ -390,7 +390,7 @@
                     myName = d.myName; 
                     generation = d.generation; 
                     familyTree = d.familyTree;
-                    babyCounter = d.babyCounter || 1; // 이전 저장 파일 호환성
+                    babyCounter = d.babyCounter || 2; // 이전 저장 파일 호환성 (기본값 2)
                     displayMyCharacter(); 
                     generatePartners(); 
                     alert("복구 성공!");
