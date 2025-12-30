@@ -10,7 +10,7 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -49,12 +49,12 @@
         }
         
         .baby-card {
-            background: linear-gradient(135deg, #ffeef8 0%, #f3e7ff 100%);
+            background: linear-gradient(135deg, #E4EBE7 0%, #f0f4f1 100%);
             padding: 30px;
             border-radius: 15px;
             text-align: center;
             margin-bottom: 25px;
-            border: 3px solid #ff4081;
+            border: 3px solid #1F7A4D;
         }
         
         .baby-display {
@@ -103,7 +103,7 @@
         .name-section button {
             padding: 10px 25px;
             font-size: 14px;
-            background: #667eea;
+            background: #66bb6a;
             color: white;
             border: none;
             border-radius: 8px;
@@ -112,7 +112,7 @@
         }
         
         .name-section button:hover {
-            background: #5568d3;
+            background: #4caf50;
         }
         
         .stats-section {
@@ -124,13 +124,13 @@
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #66bb6a;
         }
         
         .stat-card h3 {
             margin: 0 0 10px 0;
             font-size: 14px;
-            color: #667eea;
+            color: #66bb6a;
         }
         
         .stat-content {
@@ -170,7 +170,7 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
         }
         
@@ -181,7 +181,7 @@
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(129, 199, 132, 0.4);
         }
         
         .btn-secondary:hover {
@@ -189,7 +189,7 @@
         }
         
         .highlight {
-            color: #ff4081;
+            color: #1F7A4D;
             font-weight: bold;
         }
         
@@ -306,15 +306,68 @@
                 `);
             }
             
-            // 특별 메시지 - 고조할아버지할머니 유전이 있었는지
-            const hasAncientGenes = gameData.familyTree.length >= 4;
-            if (hasAncientGenes) {
+            // 특별 메시지 - 아가의 레어한 특징 찾기
+            const rareFeatures = [];
+            
+            // 1. 돌연변이 형질 체크 (조상 중 아무도 없던 형질)
+            const familyGenes = gameData.familyTree.map(m => m.genes);
+            ['body', 'head', 'eyes', 'color'].forEach(part => {
+                const babyValue = baby[part];
+                const hasInFamily = familyGenes.some(g => g[part] === babyValue);
+                
+                if (!hasInFamily) {
+                    const partNames = { body: '몸', head: '머리', eyes: '눈', color: '색깔' };
+                    rareFeatures.push(`🌟 아가의 ${partNames[part]}은 가족 중 누구도 가지지 않았던 완전히 새로운 형질이에요!`);
+                }
+            });
+            
+            // 2. 가장 희귀한 형질 찾기 (통계상 가장 적게 나타난 형질)
+            if (rareFeatures.length === 0) {
+                ['body', 'head', 'eyes', 'color'].forEach(part => {
+                    const partStats = stats[part];
+                    if (partStats && Object.keys(partStats).length > 0) {
+                        const babyValue = baby[part];
+                        const babyCount = partStats[babyValue] || 0;
+                        const minCount = Math.min(...Object.values(partStats));
+                        
+                        if (babyCount === minCount && minCount <= 2) {
+                            const partNames = { body: '몸', head: '머리', eyes: '눈', color: '색깔' };
+                            rareFeatures.push(`✨ 아가의 ${partNames[part]}은 가족 중에서도 매우 희귀하게 나타났어요! (10세대 중 ${babyCount}번만 등장)`);
+                        }
+                    }
+                });
+            }
+            
+            // 3. 조상으로부터 몇 세대 건너뛴 유전인지 체크
+            if (rareFeatures.length === 0 && gameData.familyTree.length >= 4) {
+                const parent = gameData.familyTree[gameData.familyTree.length - 1];
+                const grandparent = gameData.familyTree[gameData.familyTree.length - 2];
+                
+                ['body', 'head', 'eyes', 'color'].forEach(part => {
+                    const babyValue = baby[part];
+                    const isFromAncestor = gameData.familyTree.slice(0, -2).some(ancestor => ancestor.genes[part] === babyValue);
+                    const notFromParents = parent.genes[part] !== babyValue && 
+                                          (!parent.parents || (parent.parents.p1.genes[part] !== babyValue && parent.parents.p2.genes[part] !== babyValue));
+                    
+                    if (isFromAncestor && notFromParents && !rareFeatures.length) {
+                        const partNames = { body: '몸', head: '머리', eyes: '눈', color: '색깔' };
+                        rareFeatures.push(`🎩 아가의 ${partNames[part]}은 먼 조상으로부터 여러 세대를 건너뛰어 나타났어요!`);
+                    }
+                });
+            }
+            
+            // 4. 모두 평범하면 긍정적인 메시지
+            if (rareFeatures.length === 0) {
+                rareFeatures.push(`💕 아가는 가족의 특징을 고르게 물려받아 조화로운 모습이에요!`);
+            }
+            
+            // 레어 특징 표시 (최대 1개)
+            if (rareFeatures.length > 0) {
                 statsHTML.push(`
                     <div class="stat-card">
-                        <h3>🎩 특별한 유전</h3>
+                        <h3>🎁 특별한 점</h3>
                         <div class="stat-text">
-                            이 가족에는 고조할아버지 고조할머니까지의<br>
-                            오랜 유전 역사가 있어요! 🌳
+                            ${rareFeatures[0]}
                         </div>
                     </div>
                 `);
@@ -341,10 +394,21 @@
             });
             localStorage.setItem('jinmix_collection', JSON.stringify(collection));
             
+            // 유저 닉네임 가져오기
+            const userName = localStorage.getItem('jinmix_userName') || '주인';
+            
+            // 랜덤 메시지 선택
+            const messages = [
+                `${userName}님 감사해요!`,
+                `${userName}님 앞으로 잘 살게요.`,
+                `사랑해요 ${userName}님`
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
             // UI 업데이트
             document.getElementById('nameSection').style.display = 'none';
             document.getElementById('finalNameDisplay').style.display = 'block';
-            document.getElementById('finalName').textContent = name;
+            document.getElementById('finalName').innerHTML = `${name}<br><small style="font-size: 14px; color: #666; font-weight: normal; margin-top: 8px; display: block;">${randomMessage}</small>`;
             
             alert(`${name} (이)라는 이름이 확정되었어요! 💕`);
         }
