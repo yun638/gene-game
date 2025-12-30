@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진믹스</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        .top-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .top-buttons button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .character-display {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border: 3px solid #333;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .part-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+        .body { z-index: 1; }
+        .head { z-index: 2; }
+        .eyes { z-index: 3; }
+        .my-character-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 10px;
+        }
+        .name-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin: 10px 0;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .name-display:hover {
+            background: #c8e6c9;
+        }
+        .info {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .partners-section {
+            margin-top: 30px;
+        }
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .partner-card {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        .partner-card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .partner-card.selected {
+            border-color: #ff4081;
+            background: #fce4ec;
+        }
+        .partner-display {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 10px auto;
+            border: 2px solid #666;
+            border-radius: 5px;
+            background: #fff;
+        }
+        .partner-display .part-layer {
+            font-size: 30px;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 10px 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .breed-button {
+            background-color: #ff4081;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        .breed-button:hover {
+            background-color: #f50057;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .modal-close:hover {
+            color: #000;
+        }
+        .family-tree {
+            margin-top: 20px;
+        }
+        .tree-node {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .tree-node-current {
+            border-left-color: #ff4081;
+            background: #fce4ec;
+        }
+        .tree-character {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin: 5px;
+            border: 2px solid #666;
+            border-radius: 5px;
+            background: #fff;
+            vertical-align: middle;
+        }
+        .tree-character .part-layer {
+            font-size: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-buttons">
+            <button onclick="showFamilyTree()">🌳 가계도 보기</button>
+            <button onclick="saveGame()">💾 저장하기</button>
+            <button onclick="loadGame()">📂 불러오기</button>
+        </div>
+
+        <h1>💕 진믹스</h1>
+        
+        <div class="my-character-section">
+            <h2>내 캐릭터</h2>
+            <div class="name-display" onclick="changeName()" id="nameDisplay">이름 없음</div>
+            <div style="font-size: 12px; color: #666; margin-bottom: 10px;">(클릭해서 이름 변경)</div>
+            <div class="character-display" id="myCharacter">
+                <div class="part-layer body" id="myBodyPart"></div>
+                <div class="part-layer head" id="myHeadPart"></div>
+                <div class="part-layer eyes" id="myEyesPart"></div>
+            </div>
+            <div class="info" id="myGenetics"></div>
+            <div class="info">
+                <strong>세대:</strong> <span id="generation">1</span>
+            </div>
+        </div>
+
+        <div class="partners-section">
+            <h2>💝 배우자 후보 선택</h2>
+            <button onclick="generatePartners()">🔄 새로운 후보 보기</button>
+            
+            <div class="partners-grid" id="partnersGrid"></div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="breed-button" onclick="breed()" id="breedButton" disabled>
+                    👶 선택한 배우자와 교배하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 가계도 모달 -->
+    <div id="familyTreeModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('familyTreeModal')">&times;</span>
+            <h2>🌳 가계도</h2>
+            <div id="familyTreeContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 유전자 옵션 정의
+        // 이미지 경로 (GitHub에 올린 후 전체 URL로 변경 가능)
+        const GENES = {
+            body: ['images/body_0.png', 'images/body_1.png', 'images/body_2.png', 'images/body_3.png'],
+            head: ['images/head_0.png', 'images/head_1.png', 'images/head_2.png', 'images/head_3.png'],
+            eyes: ['images/eyes_0.png', 'images/eyes_1.png', 'images/eyes_2.png', 'images/eyes_3.png']
+        };
+
+        // 색상 옵션 (몸통과 머리는 항상 같은 색)
+        const COLORS = [
+            'none',                           // 0: 원본 색
+            'hue-rotate(120deg)',            // 1: 초록
+            'hue-rotate(240deg)'             // 2: 파랑
+        ];
+
+        const COLOR_NAMES = ['빨강', '초록', '파랑'];
+
+        // 게임 상태
+        let myGenes = {
+            body: Math.floor(Math.random() * GENES.body.length),
+            head: Math.floor(Math.random() * GENES.head.length),
+            eyes: Math.floor(Math.random() * GENES.eyes.length),
+            color: Math.floor(Math.random() * COLORS.length) // 몸통과 머리 공통 색상
+        };
+
+        let myName = "이름 없음";
+        let partners = [];
+        let selectedPartnerIndex = null;
+        let generation = 1;
+        let familyTree = [];
+
+        // 초기 가계도에 첫 캐릭터 추가
+        familyTree.push({
+            name: myName,
+            genes: {...myGenes},
+            generation: 1,
+            parents: null
+        });
+
+        // 초기화
+        displayMyCharacter();
+        generatePartners();
+
+        // 내 캐릭터 표시
+        function displayMyCharacter() {
+            document.getElementById('myBodyPart').innerHTML = `<img src="${GENES.body[myGenes.body]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[myGenes.color]};">`;
+            document.getElementById('myHeadPart').innerHTML = `<img src="${GENES.head[myGenes.head]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[myGenes.color]};">`;
+            document.getElementById('myEyesPart').innerHTML = `<img src="${GENES.eyes[myGenes.eyes]}" style="width: 100%; height: 100%; object-fit: contain;">`;
+            document.getElementById('nameDisplay').textContent = myName;
+            
+            document.getElementById('myGenetics').innerHTML = `
+                <strong>유전자:</strong><br>
+                색상: ${COLOR_NAMES[myGenes.color]}<br>
+                몸통: 타입${myGenes.body}<br>
+                머리: 타입${myGenes.head}<br>
+                눈: 타입${myGenes.eyes}
+            `;
+        }
+
+        // 이름 변경
+        function changeName() {
+            const newName = prompt("캐릭터의 이름을 입력하세요:", myName);
+            if (newName && newName.trim() !== "") {
+                myName = newName.trim();
+                familyTree[familyTree.length - 1].name = myName;
+                displayMyCharacter();
+            }
+        }
+
+        // 랜덤 유전자 생성
+        function randomGenes() {
+            return {
+                body: Math.floor(Math.random() * GENES.body.length),
+                head: Math.floor(Math.random() * GENES.head.length),
+                eyes: Math.floor(Math.random() * GENES.eyes.length),
+                color: Math.floor(Math.random() * COLORS.length)
+            };
+        }
+
+        // 배우자 후보들 생성
+        function generatePartners() {
+            partners = [];
+            for (let i = 0; i < 6; i++) {
+                partners.push(randomGenes());
+            }
+            selectedPartnerIndex = null;
+            document.getElementById('breedButton').disabled = true;
+            displayPartners();
+        }
+
+        // 캐릭터 HTML 생성 함수
+        function getCharacterHTML(genes, size = 'normal') {
+            const sizeStyle = size === 'small' ? 'font-size: 20px;' : '';
+            return `
+                <div class="part-layer body"><img src="${GENES.body[genes.body]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[genes.color]};"></div>
+                <div class="part-layer head"><img src="${GENES.head[genes.head]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[genes.color]};"></div>
+                <div class="part-layer eyes"><img src="${GENES.eyes[genes.eyes]}" style="width: 100%; height: 100%; object-fit: contain;"></div>
+            `;
+        }
+
+        // 배우자 후보들 화면에 표시
+        function displayPartners() {
+            const grid = document.getElementById('partnersGrid');
+            grid.innerHTML = '';
+            
+            partners.forEach((partnerGenes, index) => {
+                const card = document.createElement('div');
+                card.className = 'partner-card';
+                if (selectedPartnerIndex === index) {
+                    card.className += ' selected';
+                }
+                
+                card.onclick = () => selectPartner(index);
+                
+                card.innerHTML = `
+                    <div class="partner-display">
+                        ${getCharacterHTML(partnerGenes, 'small')}
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                        후보 ${index + 1}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // 배우자 선택
+        function selectPartner(index) {
+            selectedPartnerIndex = index;
+            document.getElementById('breedButton').disabled = false;
+            displayPartners();
+        }
+
+        // 교배
+        function breed() {
+            if (selectedPartnerIndex === null) {
+                alert('배우자를 선택해주세요!');
+                return;
+            }
+
+            const partnerGenes = partners[selectedPartnerIndex];
+            const parentName = myName;
+            const parentGenes = {...myGenes};
+            
+            // 각 파츠와 색상을 부모 중 하나에게서 랜덤으로 물려받음
+            const childGenes = {
+                body: Math.random() < 0.5 ? myGenes.body : partnerGenes.body,
+                head: Math.random() < 0.5 ? myGenes.head : partnerGenes.head,
+                eyes: Math.random() < 0.5 ? myGenes.eyes : partnerGenes.eyes,
+                color: Math.random() < 0.5 ? myGenes.color : partnerGenes.color
+            };
+
+            // 5% 확률로 돌연변이 발생
+            let mutationOccurred = false;
+            if (Math.random() < 0.05) {
+                const mutationType = Math.random();
+                if (mutationType < 0.75) {
+                    // 75%: 파츠 돌연변이
+                    const mutationPart = ['body', 'head', 'eyes'][Math.floor(Math.random() * 3)];
+                    childGenes[mutationPart] = Math.floor(Math.random() * GENES[mutationPart].length);
+                } else {
+                    // 25%: 색상 돌연변이
+                    childGenes.color = Math.floor(Math.random() * COLORS.length);
+                }
+                mutationOccurred = true;
+            }
+
+            // 자식이 새로운 내 캐릭터가 됨
+            myGenes = childGenes;
+            generation++;
+            myName = "새끼";
+            
+            // 가계도에 추가
+            familyTree.push({
+                name: myName,
+                genes: {...childGenes},
+                generation: generation,
+                parents: {
+                    parent1: {name: parentName, genes: parentGenes},
+                    parent2: {name: "배우자", genes: partnerGenes}
+                }
+            });
+            
+            document.getElementById('generation').textContent = generation;
+            displayMyCharacter();
+            
+            // 새로운 배우자 후보 생성
+            generatePartners();
+            
+            if (mutationOccurred) {
+                alert('✨ 돌연변이가 발생했습니다!');
+            }
+        }
+
+        // 가계도 표시
+        function showFamilyTree() {
+            const content = document.getElementById('familyTreeContent');
+            content.innerHTML = '';
+            
+            if (familyTree.length === 0) {
+                content.innerHTML = '<p>아직 가계도가 없습니다.</p>';
+            } else {
+                familyTree.forEach((member, index) => {
+                    const isCurrentGen = (index === familyTree.length - 1);
+                    const nodeDiv = document.createElement('div');
+                    nodeDiv.className = isCurrentGen ? 'tree-node tree-node-current' : 'tree-node';
+                    
+                    let html = `
+                        <strong>${member.generation}세대: ${member.name}</strong>
+                        ${isCurrentGen ? ' (현재)' : ''}
+                        <br>
+                        <div class="tree-character">
+                            ${getCharacterHTML(member.genes, 'small')}
+                        </div>
+                        <span style="font-size: 12px; color: #666;">
+                            색상: ${COLOR_NAMES[member.genes.color]} | 
+                            몸통: 타입${member.genes.body} | 
+                            머리: 타입${member.genes.head} | 
+                            눈: 타입${member.genes.eyes}
+                        </span>
+                    `;
+                    
+                    if (member.parents) {
+                        html += `
+                            <br><br>
+                            <div style="font-size: 14px; color: #666;">
+                                <strong>부모:</strong><br>
+                                <div style="display: inline-block; margin: 5px;">
+                                    ${member.parents.parent1.name}
+                                    <div class="tree-character">
+                                        ${getCharacterHTML(member.parents.parent1.genes, 'small')}
+                                    </div>
+                                </div>
+                                +
+                                <div style="display: inline-block; margin: 5px;">
+                                    ${member.parents.parent2.name}
+                                    <div class="tree-character">
+                                        ${getCharacterHTML(member.parents.parent2.genes, 'small')}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    nodeDiv.innerHTML = html;
+                    content.appendChild(nodeDiv);
+                });
+            }
+            
+            document.getElementById('familyTreeModal').style.display = 'block';
+        }
+
+        // 모달 닫기
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 모달 외부 클릭시 닫기
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // 게임 저장
+        function saveGame() {
+            const gameData = {
+                myGenes: myGenes,
+                myName: myName,
+                generation: generation,
+                familyTree: familyTree
+            };
+            
+            const jsonData = JSON.stringify(gameData);
+            const blob = new Blob([jsonData], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `진믹스_${myName}_세대${generation}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('게임이 저장되었습니다!');
+        }
+
+        // 게임 불러오기
+        function loadGame() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const gameData = JSON.parse(event.target.result);
+                        
+                        myGenes = gameData.myGenes;
+                        myName = gameData.myName;
+                        generation = gameData.generation;
+                        familyTree = gameData.familyTree;
+                        
+                        document.getElementById('generation').textContent = generation;
+                        displayMyCharacter();
+                        generatePartners();
+                        
+                        alert('게임을 불러왔습니다!');
+                    } catch (error) {
+                        alert('파일을 불러오는데 실패했습니다.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+    </script>
+</body>
+</html>
