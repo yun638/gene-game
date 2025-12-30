@@ -292,7 +292,6 @@
                 </div>
             </div>
             
-            <div class="info" id="myGenetics"></div>
             <div class="info">
                 <strong>세대:</strong> <span id="generation">1</span>
             </div>
@@ -371,14 +370,6 @@
             document.getElementById('myHeadPart').innerHTML = `<img src="${GENES.head[myGenes.head]}" style="width: 100%; height: 100%; object-fit: contain; filter: ${COLORS[myGenes.color]};">`;
             document.getElementById('myEyesPart').innerHTML = `<img src="${GENES.eyes[myGenes.eyes]}" style="width: 100%; height: 100%; object-fit: contain;">`;
             document.getElementById('nameDisplay').textContent = myName;
-            
-            document.getElementById('myGenetics').innerHTML = `
-                <strong>유전자:</strong><br>
-                색상: ${COLOR_NAMES[myGenes.color]}<br>
-                몸통: 타입${myGenes.body}<br>
-                머리: 타입${myGenes.head}<br>
-                눈: 타입${myGenes.eyes}
-            `;
         }
 
         // 이름 변경
@@ -484,28 +475,69 @@
             const parentName = myName;
             const parentGenes = {...myGenes};
             
-            // 각 파츠와 색상을 부모 중 하나에게서 랜덤으로 물려받음
-            const childGenes = {
-                body: Math.random() < 0.5 ? myGenes.body : partnerGenes.body,
-                head: Math.random() < 0.5 ? myGenes.head : partnerGenes.head,
-                eyes: Math.random() < 0.5 ? myGenes.eyes : partnerGenes.eyes,
-                color: Math.random() < 0.5 ? myGenes.color : partnerGenes.color
-            };
-
-            // 5% 확률로 돌연변이 발생
-            let mutationOccurred = false;
-            if (Math.random() < 0.05) {
-                const mutationType = Math.random();
-                if (mutationType < 0.75) {
-                    // 75%: 파츠 돌연변이
-                    const mutationPart = ['body', 'head', 'eyes'][Math.floor(Math.random() * 3)];
-                    childGenes[mutationPart] = Math.floor(Math.random() * GENES[mutationPart].length);
-                } else {
-                    // 25%: 색상 돌연변이
-                    childGenes.color = Math.floor(Math.random() * COLORS.length);
+            // 조부모와 증조부모 유전자 가져오기
+            const currentFamily = familyTree[familyTree.length - 1];
+            const grandparents = currentFamily.parents ? [
+                currentFamily.parents.parent1.genes,
+                currentFamily.parents.parent2.genes
+            ] : null;
+            
+            let greatGrandparents = null;
+            if (familyTree.length >= 2) {
+                const parentGeneration = familyTree[familyTree.length - 2];
+                if (parentGeneration.parents) {
+                    greatGrandparents = [
+                        parentGeneration.parents.parent1.genes,
+                        parentGeneration.parents.parent2.genes
+                    ];
                 }
-                mutationOccurred = true;
             }
+            
+            // 각 파츠별로 유전 결정
+            const childGenes = {
+                body: 0,
+                head: 0,
+                eyes: 0,
+                color: 0
+            };
+            
+            const inheritanceMessages = [];
+            const parts = ['body', 'head', 'eyes', 'color'];
+            
+            parts.forEach(part => {
+                const rand = Math.random() * 100;
+                
+                if (rand < 70) {
+                    // 70% 부모
+                    childGenes[part] = Math.random() < 0.5 ? myGenes[part] : partnerGenes[part];
+                } else if (rand < 85 && grandparents) {
+                    // 15% 조부모
+                    const grandparent = grandparents[Math.floor(Math.random() * grandparents.length)];
+                    childGenes[part] = grandparent[part];
+                    if (part === 'color') {
+                        inheritanceMessages.push('🎨 조부모의 색상 유전!');
+                    } else {
+                        inheritanceMessages.push(`👴👵 조부모의 ${part === 'body' ? '몸통' : part === 'head' ? '머리' : '눈'} 유전!`);
+                    }
+                } else if (rand < 90 && greatGrandparents) {
+                    // 5% 증조부모
+                    const greatGrandparent = greatGrandparents[Math.floor(Math.random() * greatGrandparents.length)];
+                    childGenes[part] = greatGrandparent[part];
+                    if (part === 'color') {
+                        inheritanceMessages.push('🎨 증조부모의 색상 유전!');
+                    } else {
+                        inheritanceMessages.push(`👵👴 증조부모의 ${part === 'body' ? '몸통' : part === 'head' ? '머리' : '눈'} 유전!`);
+                    }
+                } else {
+                    // 10% 돌연변이 (또는 조부모/증조부모 없을 때)
+                    if (part === 'color') {
+                        childGenes[part] = Math.floor(Math.random() * COLORS.length);
+                    } else {
+                        childGenes[part] = Math.floor(Math.random() * GENES[part].length);
+                    }
+                    inheritanceMessages.push(`✨ ${part === 'color' ? '색상' : part === 'body' ? '몸통' : part === 'head' ? '머리' : '눈'} 돌연변이!`);
+                }
+            });
 
             // 자식이 새로운 내 캐릭터가 됨
             myGenes = childGenes;
@@ -529,8 +561,10 @@
             // 새로운 배우자 후보 생성
             generatePartners();
             
-            if (mutationOccurred) {
-                alert('✨ 돌연변이가 발생했습니다!');
+            // 유전 메시지 표시
+            if (inheritanceMessages.length > 0) {
+                const uniqueMessages = [...new Set(inheritanceMessages)];
+                alert(uniqueMessages.join('\n'));
             }
         }
 
