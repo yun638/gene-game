@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진믹스 - 게임</title>
+    <style>
+        /* 기본 레이아웃 */
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; background-color: #f0f0f0; margin: 0; }
+        .container { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; width: 100%; box-sizing: border-box; }
+        
+        /* 🔴 카운터 강조 */
+        .counter-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .counter-section.almost-there {
+            background: linear-gradient(135deg, #ff4081 0%, #ff1744 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .counter-text {
+            font-size: 16px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+        
+        .counter-number {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        /* 캐릭터 표시 (Mask 방식) */
+        .character-container { position: relative; width: 90px; height: 90px; margin: 10px auto; background-color: transparent !important; }
+        .part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .body, .head {
+            -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
+            mask-size: contain; mask-repeat: no-repeat; mask-position: center;
+            z-index: 1;
+        }
+        .head { z-index: 2; }
+        .eyes { z-index: 3; object-fit: contain; }
+
+        /* UI 요소 */
+        .my-character-section { text-align: center; margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; }
+        .characters-row { display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .partners-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .partner-card { padding: 10px; border: 2px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; background: white; }
+        .partner-card.selected { border-color: #ff4081; background: #fce4ec; }
+        .partner-container { position: relative; width: 60px; height: 60px; margin: 5px auto; background: transparent !important; }
+        button { padding: 10px 16px; margin: 5px; cursor: pointer; border-radius: 5px; border: none; background: #4CAF50; color: white; font-size: 14px; }
+        button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
+        .breed-button { background: #ff4081; width: 100%; font-size: 16px; margin-top: 10px; }
+        .breed-button:disabled { background: #ccc; }
+        #loadingOverlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 2000; align-items: center; justify-content: center; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay">🔄 이미지 로딩 중...</div>
+    
+    <div class="container">
+        <!-- 🔴 카운터 섹션 (가장 상단에 강조) -->
+        <div class="counter-section" id="counterSection">
+            <div class="counter-text">현재 진행상황</div>
+            <div class="counter-number"><span id="currentCount">1</span> / 10 번째 아가</div>
+        </div>
+
+        <div class="my-character-section">
+            <div id="nameDisplay" onclick="changeName()" style="font-size:20px; font-weight:bold; cursor:pointer; color:#2e7d32; margin-bottom: 10px;">이름 없음</div>
+            <div class="characters-row">
+                <div class="character-container" id="myCharacter">
+                    <div class="part body" id="myBodyPart"></div>
+                    <div class="part head" id="myHeadPart"></div>
+                    <img class="part eyes" id="myEyesPart">
+                </div>
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="40" alt="하트">
+                <div class="character-container" id="selectedPartnerDisplay" style="border: 3px dashed #ff4081; display:flex; align-items:center; justify-content:center;">
+                    <span style="color:#999; text-align: center; line-height: 1.4;">배우자<br>미선택</span>
+                </div>
+            </div>
+            <div class="info" style="margin-top: 10px;">세대: <span id="generation">1</span></div>
+        </div>
+
+        <div class="partners-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
+                <h2 style="font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Yellow%20heart/3D/yellow_heart_3d.png" width="24" style="vertical-align: middle;">
+                    배우자 후보
+                </h2>
+                <button onclick="generatePartners()" style="padding: 6px 12px; font-size: 13px; margin: 0;">새로운 후보</button>
+            </div>
+            <div class="partners-grid" id="partnersGrid"></div>
+            <button class="breed-button" id="breedButton" onclick="breed()" disabled>👶 교배하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 🔥 자동 확장 가능한 유전자 시스템
+        const GENE_CONFIG = {
+            body: { folder: 'images', prefix: 'body_', count: null },
+            head: { folder: 'images', prefix: 'head_', count: null },
+            eyes: { folder: 'images', prefix: 'eyes_', count: null }
+        };
+        
+        const COLORS = ['#ffd2d2', '#c1e2bd', '#bcdff1', '#a0a0a0', '#b1bf62', '#ebebeb', '#91b5e8', '#ffe39c', '#c3eada', '#edff59', '#ffc4c4'];
+
+        let GENES = {};
+        let myGenes = {};
+        let myName = "초대 국왕 - 아가1";
+        let generation = 1;
+        let babyCounter = 2;
+        let familyTree = [];
+        let partners = [];
+        let selectedPartnerIndex = null;
+        let inheritanceStats = { body: {}, head: {}, eyes: {}, color: {} }; // 유전 통계
+
+        async function detectImageCount(folder, prefix) {
+            let count = 0;
+            while (true) {
+                const testPath = `${folder}/${prefix}${count}.png`;
+                try {
+                    const response = await fetch(testPath, { method: 'HEAD' });
+                    if (response.ok) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                } catch {
+                    break;
+                }
+            }
+            return count;
+        }
+
+        async function initializeGenes() {
+            for (const [part, config] of Object.entries(GENE_CONFIG)) {
+                const count = await detectImageCount(config.folder, config.prefix);
+                config.count = count;
+                GENES[part] = Array.from({length: count}, (_, i) => `${config.folder}/${config.prefix}${i}.png`);
+                console.log(`✅ ${part}: ${count}개 이미지 감지됨`);
+            }
+            GENE_CONFIG.color = { count: COLORS.length };
+        }
+
+        window.onload = async function() {
+            try {
+                await initializeGenes();
+                
+                if (Object.values(GENE_CONFIG).some(c => c.count === 0)) {
+                    alert("⚠️ 일부 이미지 파일이 없습니다. images 폴더를 확인해주세요.");
+                }
+                
+                myGenes = randomGenes();
+                familyTree.push({ name: myName, genes: {...myGenes}, generation: 1, parents: null });
+                displayMyCharacter();
+                generatePartners();
+                updateCounter();
+                
+                document.getElementById('loadingOverlay').style.display = 'none';
+            } catch (error) {
+                console.error("초기화 실패:", error);
+                alert("❌ 게임 초기화에 실패했습니다.");
+            }
+        };
+
+        function updateCounter() {
+            const currentCount = generation;
+            document.getElementById('currentCount').textContent = currentCount;
+            
+            // 9번째 아가일 때 색상 변경
+            if (currentCount === 9) {
+                document.getElementById('counterSection').classList.add('almost-there');
+            }
+        }
+
+        function displayMyCharacter() {
+            const color = COLORS[myGenes.color];
+            const body = document.getElementById('myBodyPart');
+            body.style.webkitMaskImage = `url('${GENES.body[myGenes.body]}')`;
+            body.style.maskImage = `url('${GENES.body[myGenes.body]}')`;
+            body.style.backgroundColor = color;
+
+            const head = document.getElementById('myHeadPart');
+            head.style.webkitMaskImage = `url('${GENES.head[myGenes.head]}')`;
+            head.style.maskImage = `url('${GENES.head[myGenes.head]}')`;
+            head.style.backgroundColor = color;
+
+            document.getElementById('myEyesPart').src = GENES.eyes[myGenes.eyes];
+            document.getElementById('nameDisplay').textContent = myName;
+            document.getElementById('generation').textContent = generation;
+        }
+
+        function getCharacterHTML(genes) {
+            const color = COLORS[genes.color];
+            return `
+                <div class="part body" style="-webkit-mask-image: url('${GENES.body[genes.body]}'); mask-image: url('${GENES.body[genes.body]}'); background-color: ${color};"></div>
+                <div class="part head" style="-webkit-mask-image: url('${GENES.head[genes.head]}'); mask-image: url('${GENES.head[genes.head]}'); background-color: ${color};"></div>
+                <img src="${GENES.eyes[genes.eyes]}" class="part eyes">
+            `;
+        }
+
+        function breed() {
+            if (selectedPartnerIndex === null || selectedPartnerIndex === undefined) {
+                alert("❌ 배우자를 먼저 선택해주세요!");
+                return;
+            }
+            
+            if (!partners[selectedPartnerIndex]) {
+                alert("❌ 유효한 배우자를 선택해주세요!");
+                return;
+            }
+
+            const pGenes = partners[selectedPartnerIndex];
+            const currentFamily = familyTree[familyTree.length - 1];
+            
+            const grandparents = currentFamily.parents ? [currentFamily.parents.p1.genes, currentFamily.parents.p2.genes] : null;
+            let greatGrandparents = null;
+            if (familyTree.length >= 2) {
+                const parentGen = familyTree[familyTree.length - 2];
+                if (parentGen.parents) greatGrandparents = [parentGen.parents.p1.genes, parentGen.parents.p2.genes];
+            }
+
+            const childGenes = {};
+            const messages = [];
+
+            const partToKorean = (part) => {
+                const partNames = { body: '몸', head: '머리', eyes: '눈', color: '색깔' };
+                return partNames[part] || part;
+            };
+
+            ['body', 'head', 'eyes', 'color'].forEach(part => {
+                const maxValue = part === 'color' ? GENE_CONFIG.color.count : GENE_CONFIG[part].count;
+                const rand = Math.random() * 100;
+                const partKR = partToKorean(part);
+                
+                if (rand < 88) {
+                    childGenes[part] = Math.random() < 0.5 ? myGenes[part] : pGenes[part];
+                    // 유전 통계 기록
+                    const key = childGenes[part];
+                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
+                } else if (rand < 94 && grandparents) {
+                    childGenes[part] = grandparents[Math.floor(Math.random() * 2)][part];
+                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
+                        messages.push(`👴👵 할아버지 할머니의 ${partKR} 유전!`);
+                    }
+                    const key = childGenes[part];
+                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
+                } else if (rand < 96 && greatGrandparents) {
+                    childGenes[part] = greatGrandparents[Math.floor(Math.random() * 2)][part];
+                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
+                        messages.push(`👵👴 증조할아버지 증조할머니의 ${partKR} 유전!`);
+                    }
+                    const key = childGenes[part];
+                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
+                } else if (rand < 97) {
+                    let greatGreatGrandparents = null;
+                    if (familyTree.length >= 3) {
+                        const ggParentGen = familyTree[familyTree.length - 3];
+                        if (ggParentGen.parents) greatGreatGrandparents = [ggParentGen.parents.p1.genes, ggParentGen.parents.p2.genes];
+                    }
+                    
+                    if (greatGreatGrandparents) {
+                        childGenes[part] = greatGreatGrandparents[Math.floor(Math.random() * 2)][part];
+                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
+                            messages.push(`🎩 무려 고조할아버지 고조할머니의 ${partKR} 유전!`);
+                        }
+                    } else {
+                        childGenes[part] = Math.floor(Math.random() * maxValue);
+                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
+                            messages.push(`✨ ${partKR} 돌연변이 발생!`);
+                        }
+                    }
+                    const key = childGenes[part];
+                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
+                } else {
+                    childGenes[part] = Math.floor(Math.random() * maxValue);
+                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
+                        messages.push(`✨ ${partKR} 돌연변이 발생!`);
+                    }
+                    const key = childGenes[part];
+                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
+                }
+            });
+
+            const isIdenticalToMe = ['body', 'head', 'eyes', 'color'].every(part => childGenes[part] === myGenes[part]);
+            const isIdenticalToPartner = ['body', 'head', 'eyes', 'color'].every(part => childGenes[part] === pGenes[part]);
+            
+            if (isIdenticalToMe) {
+                messages.unshift(`💕 나와 똑 닮았네!`);
+            } else if (isIdenticalToPartner) {
+                messages.unshift(`💕 배우자와 똑 닮았네!`);
+            }
+
+            const oldName = myName;
+            const oldGenes = {...myGenes};
+            myGenes = childGenes;
+            myName = `아가${babyCounter}`;
+            babyCounter++;
+            generation++;
+
+            familyTree.push({
+                name: myName,
+                genes: {...myGenes},
+                generation: generation,
+                parents: { 
+                    p1: { name: oldName, genes: oldGenes }, 
+                    p2: { name: "배우자", genes: {...pGenes} } 
+                }
+            });
+
+            // 🔴 10번째 아가 체크
+            if (generation === 10) {
+                // 게임 데이터 저장
+                const gameData = {
+                    finalBaby: { name: myName, genes: {...myGenes} },
+                    familyTree: familyTree,
+                    inheritanceStats: inheritanceStats
+                };
+                localStorage.setItem('jinmix_gameData', JSON.stringify(gameData));
+                
+                // 결과 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = 'result.html';
+                }, 1000);
+                
+                alert("🎉 축하합니다! 10번째 아가를 데려왔어요!");
+                return;
+            }
+
+            if (messages.length > 0) alert([...new Set(messages)].join('\n'));
+            displayMyCharacter();
+            generatePartners();
+            updateCounter();
+        }
+
+        function generatePartners() {
+            partners = Array.from({length: 4}, () => randomGenes());
+            selectedPartnerIndex = null;
+            
+            const grid = document.getElementById('partnersGrid');
+            grid.innerHTML = '';
+            
+            document.getElementById('breedButton').disabled = true;
+            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999; text-align: center; line-height: 1.4;">배우자<br>미선택</span>';
+            
+            partners.forEach((p, i) => {
+                const card = document.createElement('div');
+                card.className = 'partner-card';
+                card.onclick = () => {
+                    selectedPartnerIndex = i;
+                    document.getElementById('selectedPartnerDisplay').innerHTML = getCharacterHTML(partners[i]);
+                    document.getElementById('breedButton').disabled = false;
+                    document.querySelectorAll('.partner-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                };
+                card.innerHTML = `<div class="partner-container">${getCharacterHTML(p)}</div><div style="font-size: 12px;">후보 ${i+1}</div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function randomGenes() {
+            return { 
+                body: Math.floor(Math.random() * GENE_CONFIG.body.count), 
+                head: Math.floor(Math.random() * GENE_CONFIG.head.count), 
+                eyes: Math.floor(Math.random() * GENE_CONFIG.eyes.count), 
+                color: Math.floor(Math.random() * GENE_CONFIG.color.count) 
+            };
+        }
+
+        function changeName() { 
+            const n = prompt("이름을 입력하세요", myName); 
+            if(n) { 
+                myName = n; 
+                familyTree[familyTree.length - 1].name = n;
+                displayMyCharacter(); 
+            } 
+        }
+    </script>
+</body>
+</html>
