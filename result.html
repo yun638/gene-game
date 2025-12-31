@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>진믹스 - 축하합니다!</title>
+    
+    <!-- Open Graph 메타 태그 -->
+    <meta property="og:title" content="진믹스 - 10번째 아가를 데려왔어요!">
+    <meta property="og:description" content="드디어 특별한 아가를 만났어요! 🎉">
+    <meta property="og:image" content="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png">
+    <meta property="og:type" content="website">
+    
     <style>
         body {
             font-family: 'Noto Sans KR', Arial, sans-serif;
@@ -154,7 +161,7 @@
         
         .action-buttons {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 10px;
             margin-top: 25px;
         }
@@ -199,6 +206,85 @@
             color: #333;
             margin-top: 10px;
         }
+        
+        /* 가계도 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        
+        .close-modal {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+            color: #999;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        /* 가계도 스타일 */
+        .tree-node {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border-left: 5px solid #66bb6a;
+        }
+        
+        .tree-node-current {
+            border-left-color: #1F7A4D;
+            background: #E4EBE7;
+        }
+        
+        .tree-character {
+            display: inline-block;
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ddd;
+            vertical-align: middle;
+            background: transparent;
+            margin-right: 5px;
+        }
+        
+        .parent-visual-row {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding-top: 8px;
+            border-top: 1px dashed #ccc;
+            flex-wrap: wrap;
+            font-size: 12px;
+        }
+        
+        .mini-char {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #eee;
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -222,8 +308,21 @@
         <div class="stats-section" id="statsSection"></div>
         
         <div class="action-buttons">
-            <button class="btn-primary" onclick="restartGame()">🔁 다시 키우기</button>
+            <button class="btn-primary" onclick="showFamilyTree()">🌳 가계도 보기</button>
+            <button class="btn-secondary" onclick="restartGame()">🔁 다시 키우기</button>
             <button class="btn-secondary" onclick="goHome()">🏠 처음으로</button>
+        </div>
+    </div>
+    
+    <!-- 가계도 모달 -->
+    <div id="familyTreeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 style="display: flex; align-items: center; gap: 8px; font-size: 20px; margin: 0 0 15px 0;">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="28" style="vertical-align: middle;">
+                우리 가계도
+            </h2>
+            <div id="familyTreeContent"></div>
         </div>
     </div>
     
@@ -420,6 +519,50 @@
         
         function goHome() {
             window.location.href = 'landing.html';
+        }
+        
+        function showFamilyTree() {
+            const familyTree = gameData.familyTree;
+            const content = document.getElementById('familyTreeContent');
+            
+            content.innerHTML = familyTree.map((m, idx) => `
+                <div class="tree-node ${idx === familyTree.length - 1 ? 'tree-node-current' : ''}">
+                    <strong style="font-size: 14px;">${m.generation}세대: ${m.name}</strong><br>
+                    <div class="tree-character">${getCharacterHTML(m.genes)}</div>
+                    ${m.parents ? `
+                        <div class="parent-visual-row">
+                            <small style="white-space: nowrap;">부모:</small>
+                            <div class="tree-character mini-char">${getCharacterHTML(m.parents.p1.genes)}</div>
+                            <span>+</span>
+                            <div class="tree-character mini-char">${getCharacterHTML(m.parents.p2.genes)}</div>
+                            <small style="flex-shrink: 0;">(${m.parents.p1.name} & ${m.parents.p2.name})</small>
+                        </div>
+                    ` : '<br><small style="font-size: 11px;">초대 국왕</small>'}
+                </div>
+            `).join('');
+            
+            document.getElementById('familyTreeModal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('familyTreeModal').style.display = 'none';
+        }
+        
+        function getCharacterHTML(genes) {
+            const color = COLORS[genes.color];
+            return `
+                <div class="part body" style="-webkit-mask-image: url('images/body_${genes.body}.png'); mask-image: url('images/body_${genes.body}.png'); background-color: ${color};"></div>
+                <div class="part head" style="-webkit-mask-image: url('images/head_${genes.head}.png'); mask-image: url('images/head_${genes.head}.png'); background-color: ${color};"></div>
+                <img src="images/eyes_${genes.eyes}.png" class="part eyes">
+            `;
+        }
+        
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('familyTreeModal');
+            if (event.target == modal) {
+                closeModal();
+            }
         }
     </script>
 </body>
