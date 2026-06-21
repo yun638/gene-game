@@ -20,23 +20,29 @@
 
         .target-body { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 
-        .requester-char { width: 50px; height: 50px; position: relative; flex-shrink: 0; }
+        .requester-char { width: 48px; height: 48px; position: relative; flex-shrink: 0; }
         .requester-char .part { position: absolute; top:0; left:0; width:100%; height:100%; }
         .requester-char .body, .requester-char .head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
         .requester-char .head { z-index:2; }
         .requester-char .eyes { z-index:3; object-fit:contain; }
 
-        .speech-bubble { background: white; border: 1.5px solid #a5d6a7; border-radius: 8px 8px 8px 3px; padding: 6px 8px; flex: 1; font-size: 12px; color: #333; line-height: 1.5; }
+        .speech-bubble { background: white; border: 1.5px solid #a5d6a7; border-radius: 8px 8px 8px 3px; padding: 5px 8px; flex: 1; font-size: 12px; color: #333; line-height: 1.5; }
 
-        .bottom-row { display: flex; align-items: center; gap: 6px; }
-        .trait-tags { display: flex; gap: 5px; flex: 1; }
-        .trait-tag { display: flex; align-items: center; gap: 3px; background: white; border: 1.5px solid #ddd; border-radius: 12px; padding: 2px 7px 2px 4px; font-size: 11px; color: #555; white-space: nowrap; }
-        .trait-tag.matched { background: #e8f5e9; border-color: #66bb6a; color: #1F7A4D; font-weight: bold; }
-        .trait-tag.not-matched { background: #fff3f3; border-color: #ef9a9a; color: #c62828; }
+        /* 조건 쇼케이스 (크게 표시) */
+        .trait-showcase { display: flex; gap: 7px; }
+        .ts-box { flex: 1; background: white; border: 2px solid #ddd; border-radius: 10px; padding: 6px 4px; text-align: center; transition: all 0.3s; }
+        .ts-box.matched     { border-color: #66bb6a; background: #e8f5e9; }
+        .ts-box.not-matched { border-color: #ef9a9a; background: #fff3f3; }
+        .ts-visual { display: flex; align-items: center; justify-content: center; height: 46px; }
+        .ts-label  { font-size: 11px; color: #888; margin-top: 2px; }
+        .ts-status { font-size: 13px; font-weight: bold; line-height: 1; margin-top: 1px; }
+        .ts-status.ok   { color: #1F7A4D; }
+        .ts-status.fail { color: #e53935; }
+
+        /* 진행 */
+        .progress-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
         .turn-text { font-size: 11px; color: #888; white-space: nowrap; }
-
-        /* 진행 선 */
-        .progress-line { height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        .progress-line { flex: 1; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
         .progress-fill { height: 100%; border-radius: 2px; background: #66bb6a; transition: width 0.3s; }
         .progress-fill.urgent { background: #ef9a9a; }
 
@@ -62,12 +68,12 @@
         .partners-section { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 5px; }
         .partners-header { flex-shrink: 0; font-size: 13px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 5px; }
         .partners-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .partner-card { border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; transition: all 0.15s; }
+        .partner-card { border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: all 0.15s; }
         .partner-card.selected { border-color: #1F7A4D; background: #f1f8f4; }
-        .partner-container { position: relative; width: 50px; height: 50px; background: transparent; flex-shrink: 0; }
-        .partner-label { font-size: 11px; color: #888; }
+        .partner-container { position: relative; width: 40px; height: 40px; background: transparent; flex-shrink: 0; }
+        .partner-label { font-size: 10px; color: #888; }
 
-        .breed-btn { flex-shrink: 0; padding: 12px; background: #1F7A4D; color: white; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; font-weight: bold; }
+        .breed-btn { flex-shrink: 0; padding: 9px; background: #1F7A4D; color: white; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; font-weight: bold; }
         .breed-btn:disabled { background: #ccc; cursor: not-allowed; }
 
         #loadingOverlay { display: flex; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.93); z-index:2000; align-items:center; justify-content:center; font-size:20px; }
@@ -87,11 +93,11 @@
                 <div class="requester-char" id="requesterChar"></div>
                 <div class="speech-bubble" id="speechBubble">로딩 중...</div>
             </div>
-            <div class="bottom-row">
-                <div class="trait-tags" id="traitTags"></div>
+            <div class="trait-showcase" id="traitShowcase"></div>
+            <div class="progress-row">
                 <div class="turn-text" id="turnText">0 / 10</div>
+                <div class="progress-line"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
             </div>
-            <div class="progress-line"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
         </div>
 
         <!-- 👶 내 캐릭터 -->
@@ -108,7 +114,7 @@
                     <span style="color:#bbb;font-size:11px;text-align:center;line-height:1.4;">배우자<br>미선택</span>
                 </div>
             </div>
-            <div class="match-status-row" id="matchStatusRow"></div>
+            <div class="match-status-row" id="matchStatusRow" style="display:none;"></div>
         </div>
 
         <!-- 💑 배우자 선택 -->
@@ -160,17 +166,19 @@
             return `<span style="display:inline-block;width:${size}px;height:${size}px;-webkit-mask-image:url('images/${trait}_${value}.png');mask-image:url('images/${trait}_${value}.png');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;background-color:#1F7A4D;vertical-align:middle;"></span>`;
         }
         function updateTargetUI() {
-            const v1=traitVisual(targetTraits[0],targetGenes[targetTraits[0]],22), v2=traitVisual(targetTraits[1],targetGenes[targetTraits[1]],22);
+            const n1=TRAIT_NAMES[targetTraits[0]], n2=TRAIT_NAMES[targetTraits[1]];
             document.getElementById('speechBubble').innerHTML = dialogueType===0
-                ? `${v1}&nbsp;와&nbsp;${v2}&nbsp;을 갖춘 외계인을 찾고 있어요!`
-                : `${v1}&nbsp;와&nbsp;${v2}&nbsp;이 제 이상형이에요. 소개해주실 수 있나요? 🙏`;
+                ? `<strong>${n1}</strong>과 <strong>${n2}</strong>을 갖춘 외계인을 찾고 있어요!`
+                : `<strong>${n1}</strong>과 <strong>${n2}</strong>이 제 이상형이에요. 소개해주세요 🙏`;
 
-            const tagsHTML=targetTraits.map(t=>{
-                const vis=traitVisual(t,targetGenes[t],18), first=generation>1, matched=first&&myGenes[t]===targetGenes[t];
-                const cls=!first?'':(matched?'matched':'not-matched'), sfx=!first?'':(matched?' ✓':' ✗');
-                return `<div class="trait-tag ${cls}">${vis}<span>${TRAIT_NAMES[t]}${sfx}</span></div>`;
+            const showcaseHTML=targetTraits.map(t=>{
+                const vis=traitVisual(t,targetGenes[t],42);
+                const first=generation>1, matched=first&&myGenes[t]===targetGenes[t];
+                const cls=!first?'':(matched?'matched':'not-matched');
+                const status=!first?'':`<div class="ts-status ${matched?'ok':'fail'}">${matched?'✓':'✗'}</div>`;
+                return `<div class="ts-box ${cls}"><div class="ts-visual">${vis}</div><div class="ts-label">${TRAIT_NAMES[t]}</div>${status}</div>`;
             }).join('');
-            document.getElementById('traitTags').innerHTML=tagsHTML;
+            document.getElementById('traitShowcase').innerHTML=showcaseHTML;
 
             const rem=MAX_TURNS-turnCount;
             const badge=document.getElementById('turnBadge');
