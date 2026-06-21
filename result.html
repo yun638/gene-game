@@ -104,6 +104,13 @@
             if(!raw){location.href='index.html';return;}
             gameData=JSON.parse(raw);
             document.body.className=gameData.success?'success-bg':'fail-bg';
+            // 성공 시 골드 1개 지급 (최초 1회)
+            if(gameData.success && !gameData.goldGiven){
+                const g=parseInt(localStorage.getItem('jinmix_gold')||'0');
+                localStorage.setItem('jinmix_gold', g+1);
+                gameData.goldGiven=true;
+                localStorage.setItem('jinmix_gameData',JSON.stringify(gameData));
+            }
             renderResult();
         };
 
@@ -159,6 +166,7 @@
                 <div class="banner">
                     <span class="banner-emoji">${success?'🎉':'😢'}</span>
                     <div class="banner-title ${success?'success':'fail'}">${success?`${successTurn}번째 시도에 성공!`:'이번엔 아쉽게...'}</div>
+                    ${success?'<div style="font-size:13px;color:#b8860b;background:#fff9e6;border-radius:10px;padding:4px 12px;display:inline-block;margin-top:5px;font-weight:bold;">💰 골드 +1 획득!</div>':''}
                 </div>
 
                 <div class="requester-row">${reqHTML}<div class="req-text">${dialogueTxt}</div></div>
