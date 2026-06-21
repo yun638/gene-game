@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>덩어리들</title>
+    <title>진믹스</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { height: 100%; height: 100dvh; overflow: hidden; }
@@ -70,7 +70,7 @@
         .partners-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .partner-card { border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: all 0.15s; }
         .partner-card.selected { border-color: #1F7A4D; background: #f1f8f4; }
-        .partner-container { position: relative; width: 40px; height: 40px; background: transparent; flex-shrink: 0; }
+        .partner-container { position: relative; width: 56px; height: 56px; background: transparent; flex-shrink: 0; }
         .partner-label { font-size: 10px; color: #888; }
 
         .breed-btn { flex-shrink: 0; padding: 9px; background: #1F7A4D; color: white; border: none; border-radius: 10px; font-size: 15px; cursor: pointer; font-weight: bold; }
@@ -86,7 +86,7 @@
         <!-- 🎯 목표 카드 -->
         <div class="target-card">
             <div class="target-header">
-                <div class="target-label">🔍 이상형을 찾아주세요!</div>
+                <div class="target-label">🚀 수출 조건</div>
                 <div class="turn-badge" id="turnBadge">남은 턴: 10</div>
             </div>
             <div class="target-body">
@@ -168,8 +168,8 @@
         function updateTargetUI() {
             const n1=TRAIT_NAMES[targetTraits[0]], n2=TRAIT_NAMES[targetTraits[1]];
             document.getElementById('speechBubble').innerHTML = dialogueType===0
-                ? `<strong>${n1}</strong>과 <strong>${n2}</strong>을 갖춘 외계인을 찾고 있어요!`
-                : `<strong>${n1}</strong>과 <strong>${n2}</strong>이 제 이상형이에요. 소개해주세요 🙏`;
+                ? `<strong>${n1}</strong>과 <strong>${n2}</strong>을 갖춘 외계인을 지구로 수출하고 싶어요!`
+                : `<strong>${n1}</strong>과 <strong>${n2}</strong>이면 지구 수출 OK! 교배해주세요 🚀`;
 
             const showcaseHTML=targetTraits.map(t=>{
                 const vis=traitVisual(t,targetGenes[t],42);
