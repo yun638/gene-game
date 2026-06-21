@@ -3,70 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>진믹스 - 이상형을 찾아라!</title>
+    <title>진믹스 - 결과</title>
     <style>
-        body { font-family:'Noto Sans KR',Arial,sans-serif; margin:0; padding:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#81c784,#43a047); }
-        .landing-container { background:white; padding:36px 28px; border-radius:22px; box-shadow:0 20px 60px rgba(0,0,0,0.28); max-width:420px; width:90%; text-align:center; animation:fadeIn 0.55s ease-out; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-        .title { font-size:32px; font-weight:bold; color:#1a1a1a; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:10px; }
-        .subtitle { font-size:15px; color:#666; margin-bottom:28px; line-height:1.6; }
-        .requester-preview { background:linear-gradient(135deg,#f1f8e9,#e8f5e9); border:2px solid #a5d6a7; border-radius:14px; padding:16px; margin-bottom:24px; display:flex; align-items:center; gap:12px; text-align:left; }
-        .req-icon { font-size:34px; flex-shrink:0; }
-        .req-bubble { background:white; border:1.5px solid #c8e6c9; border-radius:12px 12px 12px 4px; padding:9px 12px; font-size:13px; color:#333; line-height:1.6; flex:1; }
-        .req-bubble strong { color:#1F7A4D; }
-        .rules { background:#f8f9fa; padding:20px; border-radius:14px; margin-bottom:24px; text-align:left; }
-        .rules h3 { margin:0 0 13px; font-size:14px; color:#43a047; text-align:center; }
-        .rule-item { margin:10px 0; padding-left:22px; position:relative; font-size:14px; color:#444; line-height:1.55; }
-        .rule-item::before { content:"•"; position:absolute; left:6px; color:#66bb6a; font-size:18px; }
-        .rule-item .hl { color:#1F7A4D; font-weight:bold; }
-        .input-section { margin-bottom:16px; }
-        .input-section label { display:block; font-size:13px; color:#666; margin-bottom:7px; text-align:left; }
-        .input-section input { width:100%; padding:11px 13px; font-size:15px; border:2px solid #ddd; border-radius:8px; box-sizing:border-box; transition:border-color 0.25s; }
-        .input-section input:focus { outline:none; border-color:#66bb6a; }
-        .start-btn { width:100%; padding:14px; font-size:17px; font-weight:bold; color:white; background:linear-gradient(135deg,#66bb6a,#43a047); border:none; border-radius:11px; cursor:pointer; transition:transform 0.18s,box-shadow 0.18s; }
-        .start-btn:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(67,160,71,0.38); }
-        .collection-btn { width:100%; padding:11px; font-size:14px; font-weight:bold; color:#1F7A4D; background:white; border:2px solid #a5d6a7; border-radius:11px; cursor:pointer; margin-top:10px; transition:all 0.18s; }
-        .collection-btn:hover { background:#e8f5e9; }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        html, body { height:100%; height:100dvh; overflow:hidden; }
+        body { font-family:Arial,sans-serif; display:flex; align-items:center; justify-content:center; }
+        body.success-bg { background:linear-gradient(135deg,#81c784,#43a047); }
+        body.fail-bg    { background:linear-gradient(135deg,#90a4ae,#607d8b); }
+
+        .result-container { background:white; border-radius:20px; box-shadow:0 16px 50px rgba(0,0,0,0.25); max-width:420px; width:92%; padding:18px 16px; display:flex; flex-direction:column; gap:10px; animation:slideIn 0.45s ease-out; max-height:96dvh; overflow-y:auto; }
+        @keyframes slideIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+        /* 배너 */
+        .banner { text-align:center; padding-bottom:10px; border-bottom:1px solid #eee; }
+        .banner-emoji { font-size:38px; display:block; margin-bottom:4px; }
+        .banner-title { font-size:20px; font-weight:bold; }
+        .banner-title.success { color:#1F7A4D; }
+        .banner-title.fail    { color:#455a64; }
+
+        /* 의뢰인 */
+        .requester-row { background:#f5f5f5; border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
+        .req-mini { position:relative; width:44px; height:44px; flex-shrink:0; background:transparent; }
+        .req-mini .part { position:absolute; top:0; left:0; width:100%; height:100%; }
+        .req-mini .body,.req-mini .head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
+        .req-mini .head { z-index:2; }
+        .req-mini .eyes { z-index:3; object-fit:contain; }
+        .req-text { font-size:12px; color:#555; line-height:1.5; flex:1; }
+
+        /* 비교 */
+        .compare-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .compare-card { background:#f9f9f9; border:2px solid #eee; border-radius:12px; padding:10px; text-align:center; }
+        .compare-card.target-c { border-color:#66bb6a; background:#f1f8e9; }
+        .compare-card.matched  { border-color:#43a047; background:#e8f5e9; }
+        .compare-label { font-size:11px; color:#888; font-weight:bold; margin-bottom:7px; }
+
+        /* 캐릭터 */
+        .char-wrap { position:relative; width:72px; height:72px; margin:0 auto 6px; background:transparent; }
+        .part { position:absolute; top:0; left:0; width:100%; height:100%; }
+        .body,.head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
+        .head { z-index:2; }
+        .eyes { z-index:3; object-fit:contain; }
+
+        /* 조건 체크 */
+        .check-list { list-style:none; }
+        .check-list li { display:flex; align-items:center; gap:6px; font-size:12px; padding:3px 0; color:#444; }
+        .check-list li.ok   { color:#1F7A4D; font-weight:bold; }
+        .check-list li.fail { color:#b0bec5; }
+        .success-badge { display:inline-block; background:#1F7A4D; color:white; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:bold; margin-top:4px; }
+
+        /* 이름 짓기 */
+        .name-section { background:#f9f9f9; border-radius:10px; padding:10px 12px; text-align:center; }
+        .name-section p { font-size:12px; color:#666; margin-bottom:7px; }
+        .name-section input { width:65%; padding:7px 10px; font-size:14px; border:2px solid #ddd; border-radius:8px; text-align:center; }
+        .name-section input:focus { outline:none; border-color:#66bb6a; }
+        .name-section button { margin-left:6px; padding:7px 14px; font-size:13px; background:#66bb6a; color:white; border:none; border-radius:8px; cursor:pointer; }
+        .final-name { font-size:17px; font-weight:bold; color:#1F7A4D; }
+        .final-msg  { font-size:12px; color:#888; margin-top:3px; }
+
+        /* 버튼 2x2 */
+        .btn-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .btn { padding:11px; font-size:13px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; transition:all 0.15s; }
+        .btn-green { background:linear-gradient(135deg,#81c784,#43a047); color:white; }
+        .btn-gray  { background:#f1f3f4; color:#333; }
+        .btn-green:hover { transform:translateY(-1px); }
+        .btn-gray:hover  { background:#e0e3e5; }
+
+        /* 가계도 모달 */
+        .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); overflow-y:auto; }
+        .modal-content { background:white; margin:40px auto; padding:18px; border-radius:15px; width:90%; max-width:480px; max-height:82vh; overflow-y:auto; }
+        .close-btn { float:right; cursor:pointer; font-size:22px; color:#999; }
+        .tree-node { background:#f9f9f9; padding:8px; margin:8px 0; border-radius:10px; border-left:4px solid #66bb6a; }
+        .tree-node-cur { border-left-color:#1F7A4D; background:#E4EBE7; }
+        .tree-char { display:inline-block; position:relative; width:44px; height:44px; border:1px solid #ddd; vertical-align:middle; background:transparent; margin-right:4px; }
+        .parent-row { margin-top:6px; display:flex; align-items:center; gap:4px; padding-top:6px; border-top:1px dashed #ccc; flex-wrap:wrap; font-size:11px; }
+        .mini-c { width:32px; height:32px; border:1px solid #eee; position:relative; }
     </style>
 </head>
 <body>
-    <div class="landing-container">
-        <div class="title">
-            <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="38">
-            진믹스
-        </div>
-        <div class="subtitle">랜덤 이상형 외계인의 조건을<br>10번 안에 맞춰보세요! 👽</div>
+    <div class="result-container" id="resultContainer"></div>
 
-        <div class="requester-preview">
-            <div class="req-icon">👽</div>
-            <div class="req-bubble">게임이 시작되면 제가 원하는<br><strong>2가지 조건</strong>을 알려드릴게요.<br>그 조건에 딱 맞는 아가를 만들어주세요!</div>
+    <!-- 가계도 모달 -->
+    <div id="familyTreeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 style="display:flex;align-items:center;gap:7px;font-size:17px;margin:0 0 12px;">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="24">
+                우리 가계도
+            </h2>
+            <div id="familyTreeContent"></div>
         </div>
-
-        <div class="rules">
-            <h3>🎮 게임 룰</h3>
-            <div class="rule-item">게임 시작 시 <span class="hl">랜덤 이상형 조건</span> 2가지가 공개돼요</div>
-            <div class="rule-item">배우자를 골라 아가를 교배해요</div>
-            <div class="rule-item"><span class="hl">조건 2가지를 모두 충족</span>하면 성공!</div>
-            <div class="rule-item">기회는 <span class="hl">딱 10번</span>뿐이에요</div>
-        </div>
-
-        <div class="input-section">
-            <label for="userName">플레이어 이름을 입력해주세요</label>
-            <input type="text" id="userName" placeholder="예: 홍길동" maxlength="10">
-        </div>
-
-        <button class="start-btn" onclick="startGame()">🎯 이상형 찾기 시작!</button>
-        <button class="collection-btn" onclick="location.href='collection.html'">🐾 내 외계인 컬렉션 보기</button>
     </div>
+
     <script>
-        document.getElementById('userName').addEventListener('keypress', e => { if(e.key==='Enter') startGame(); });
-        function startGame() {
-            const name = document.getElementById('userName').value.trim();
-            if (!name) { alert('이름을 입력해주세요! 😊'); document.getElementById('userName').focus(); return; }
-            localStorage.setItem('jinmix_userName', name);
-            localStorage.removeItem('jinmix_gameData');
-            location.href='game.html';
+        const COLORS=['#ffd2d2','#c1e2bd','#bcdff1','#a0a0a0','#b1bf62','#ebebeb','#91b5e8','#ffe39c','#c3eada','#edff59','#ffc4c4'];
+        const TRAIT_NAMES={body:'몸',head:'머리',eyes:'눈',color:'색깔'};
+        let gameData=null;
+
+        window.onload=function(){
+            const raw=localStorage.getItem('jinmix_gameData');
+            if(!raw){alert('게임 데이터가 없습니다.');location.href='index.html';return;}
+            gameData=JSON.parse(raw);
+            document.body.className=gameData.success?'success-bg':'fail-bg';
+            renderResult();
+        };
+
+        function tv(trait,value,size=22){
+            if(trait==='eyes') return `<img src="images/eyes_${value}.png" style="width:${size}px;height:${size}px;object-fit:contain;vertical-align:middle;border-radius:3px;">`;
+            if(trait==='color') return `<span style="display:inline-block;width:${size}px;height:${size}px;background:${COLORS[value]};border-radius:50%;border:2px solid rgba(0,0,0,0.1);vertical-align:middle;"></span>`;
+            return `<span style="display:inline-block;width:${size}px;height:${size}px;-webkit-mask-image:url('images/${trait}_${value}.png');mask-image:url('images/${trait}_${value}.png');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;background-color:#1F7A4D;vertical-align:middle;"></span>`;
         }
+
+        function charWrap(genes,size=72){
+            const c=COLORS[genes.color];
+            return `<div class="char-wrap" style="width:${size}px;height:${size}px;">
+                <div class="part body" style="-webkit-mask-image:url('images/body_${genes.body}.png');mask-image:url('images/body_${genes.body}.png');background-color:${c};"></div>
+                <div class="part head" style="-webkit-mask-image:url('images/head_${genes.head}.png');mask-image:url('images/head_${genes.head}.png');background-color:${c};"></div>
+                <img src="images/eyes_${genes.eyes}.png" class="part eyes"></div>`;
+        }
+
+        function getCharHTML(genes){
+            const c=COLORS[genes.color];
+            return `<div class="part body" style="-webkit-mask-image:url('images/body_${genes.body}.png');mask-image:url('images/body_${genes.body}.png');background-color:${c};"></div>
+                    <div class="part head" style="-webkit-mask-image:url('images/head_${genes.head}.png');mask-image:url('images/head_${genes.head}.png');background-color:${c};"></div>
+                    <img src="images/eyes_${genes.eyes}.png" class="part eyes">`;
+        }
+
+        function renderResult(){
+            const{success,successTurn,targetGenes,targetTraits,dialogueType,requesterGenes,finalGenes,finalName}=gameData;
+
+            // 의뢰인
+            const reqColor=requesterGenes?COLORS[requesterGenes.color]:'#aaa';
+            const reqHTML=requesterGenes
+                ?`<div class="req-mini">
+                    <div class="part body" style="-webkit-mask-image:url('images/body_${requesterGenes.body}.png');mask-image:url('images/body_${requesterGenes.body}.png');background-color:${reqColor};"></div>
+                    <div class="part head" style="-webkit-mask-image:url('images/head_${requesterGenes.head}.png');mask-image:url('images/head_${requesterGenes.head}.png');background-color:${reqColor};"></div>
+                    <img src="images/eyes_${requesterGenes.eyes}.png" class="part eyes"></div>`
+                :`<span style="font-size:32px;">👽</span>`;
+
+            const dv0=tv(targetTraits[0],targetGenes[targetTraits[0]],20), dv1=tv(targetTraits[1],targetGenes[targetTraits[1]],20);
+            const dialogueTxt=dialogueType===0?`${dv0}&nbsp;와&nbsp;${dv1}&nbsp;을 갖춘 외계인을 찾고 있었어요`:`${dv0}&nbsp;와&nbsp;${dv1}&nbsp;이 제 이상형이에요`;
+
+            const checksHTML=targetTraits.map(t=>{
+                const ok=finalGenes[t]===targetGenes[t];
+                return `<li class="${ok?'ok':'fail'}">${ok?'✅':'❌'}${tv(t,targetGenes[t],18)}<span>${TRAIT_NAMES[t]}${ok?' 충족':' 미충족'}</span></li>`;
+            }).join('');
+
+            const nameSectionHTML=success?`
+                <div class="name-section" id="nameSection">
+                    <p>이 아가에게 이름을 지어주세요 💕</p>
+                    <input type="text" id="babyNameInput" placeholder="이름 입력" maxlength="10">
+                    <button onclick="confirmName()">✅</button>
+                </div>`:'';
+
+            document.getElementById('resultContainer').innerHTML=`
+                <div class="banner">
+                    <span class="banner-emoji">${success?'🎉':'😢'}</span>
+                    <div class="banner-title ${success?'success':'fail'}">${success?`${successTurn}번째 시도에 성공!`:'이번엔 아쉽게...'}</div>
+                </div>
+
+                <div class="requester-row">${reqHTML}<div class="req-text">${dialogueTxt}</div></div>
+
+                <div class="compare-row">
+                    <div class="compare-card target-c">
+                        <div class="compare-label">🎯 목표 조건</div>
+                        <ul class="check-list">${checksHTML}</ul>
+                    </div>
+                    <div class="compare-card ${success?'matched':''}">
+                        <div class="compare-label">👶 최종 아가</div>
+                        ${charWrap(finalGenes,68)}
+                        <div style="font-size:11px;color:#888;">${finalName}</div>
+                        ${success?'<div class="success-badge">🎉 성공!</div>':''}
+                    </div>
+                </div>
+
+                ${nameSectionHTML}
+
+                <div class="btn-grid">
+                    <button class="btn btn-green" onclick="showFamilyTree()">🌳 가계도</button>
+                    <button class="btn btn-gray"  onclick="location.href='collection.html'">🐾 컬렉션</button>
+                    <button class="btn btn-gray"  onclick="restartGame()">🔁 다시 도전</button>
+                    <button class="btn btn-gray"  onclick="location.href='index.html'">🏠 처음으로</button>
+                </div>`;
+        }
+
+        function confirmName(){
+            const name=document.getElementById('babyNameInput').value.trim();
+            if(!name){alert('이름을 입력해주세요!');return;}
+            const collection=JSON.parse(localStorage.getItem('jinmix_collection')||'[]');
+            collection.push({name,baby:gameData.finalGenes,date:new Date().toISOString()});
+            localStorage.setItem('jinmix_collection',JSON.stringify(collection));
+            const msgs=['감사해요!','잘 살게요!','사랑해요 💕'];
+            document.getElementById('nameSection').innerHTML=`<div class="final-name">${name}</div><div class="final-msg">${msgs[Math.floor(Math.random()*msgs.length)]}</div>`;
+        }
+
+        function showFamilyTree(){
+            const ft=gameData.familyTree;
+            document.getElementById('familyTreeContent').innerHTML=ft.map((m,idx)=>`
+                <div class="tree-node ${idx===ft.length-1?'tree-node-cur':''}">
+                    <strong style="font-size:13px;">${m.generation}세대: ${m.name}</strong><br>
+                    <div class="tree-char">${getCharHTML(m.genes)}</div>
+                    ${m.parents?`<div class="parent-row"><small>부모:</small>
+                        <div class="tree-char mini-c">${getCharHTML(m.parents.p1.genes)}</div><span>+</span>
+                        <div class="tree-char mini-c">${getCharHTML(m.parents.p2.genes)}</div>
+                        <small>(${m.parents.p1.name} & ${m.parents.p2.name})</small></div>`
+                    :'<br><small style="font-size:11px;">초대 국왕</small>'}
+                </div>`).join('');
+            document.getElementById('familyTreeModal').style.display='block';
+        }
+
+        function closeModal(){document.getElementById('familyTreeModal').style.display='none';}
+        window.onclick=e=>{if(e.target===document.getElementById('familyTreeModal'))closeModal();};
+        function restartGame(){localStorage.removeItem('jinmix_gameData');location.href='game.html';}
     </script>
 </body>
 </html>
