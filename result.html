@@ -5,251 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>진믹스 - 결과</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0; padding: 20px; min-height: 100vh;
-            display: flex; align-items: flex-start; justify-content: center;
-            box-sizing: border-box;
-        }
-        body.success-bg { background: linear-gradient(135deg, #81c784, #43a047); }
-        body.fail-bg    { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+        body { font-family:Arial,sans-serif; margin:0; padding:20px; min-height:100vh; display:flex; align-items:flex-start; justify-content:center; box-sizing:border-box; }
+        body.success-bg { background:linear-gradient(135deg,#81c784,#43a047); }
+        body.fail-bg    { background:linear-gradient(135deg,#90a4ae,#607d8b); }
+        .result-container { background:white; padding:25px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.25); max-width:460px; width:100%; animation:slideIn 0.5s ease-out; }
+        @keyframes slideIn { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
 
-        .result-container {
-            background: white; padding: 25px; border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            max-width: 460px; width: 100%;
-            animation: slideIn 0.5s ease-out;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(28px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+        /* 배너 */
+        .result-banner { text-align:center; padding:18px 0 12px; border-bottom:1px solid #eee; margin-bottom:18px; }
+        .result-emoji  { font-size:50px; display:block; margin-bottom:6px; }
+        .result-title  { font-size:22px; font-weight:bold; margin:0 0 5px; }
+        .result-sub    { font-size:13px; color:#666; margin:0; }
+        .result-title.success { color:#1F7A4D; }
+        .result-title.fail    { color:#455a64; }
 
-        /* 결과 배너 */
-        .result-banner {
-            text-align: center; padding: 20px 0 14px;
-            border-bottom: 1px solid #eee; margin-bottom: 20px;
-        }
-        .result-emoji { font-size: 52px; display: block; margin-bottom: 6px; }
-        .result-title { font-size: 24px; font-weight: bold; margin: 0 0 6px; }
-        .result-sub   { font-size: 14px; color: #666; margin: 0; }
-        .result-title.success { color: #1F7A4D; }
-        .result-title.fail    { color: #455a64; }
+        /* 비교 */
+        .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+        .compare-card { background:#f9f9f9; border:2px solid #eee; border-radius:14px; padding:14px; text-align:center; }
+        .compare-card.target-card-r { border-color:#66bb6a; background:#f1f8e9; }
+        .compare-card.matched { border-color:#43a047; background:#e8f5e9; }
+        .compare-label { font-size:12px; color:#888; margin-bottom:8px; font-weight:bold; }
 
-        /* 비교 카드 */
-        .compare-section { margin-bottom: 20px; }
-        .compare-section h3 { font-size: 14px; color: #888; margin: 0 0 12px; font-weight: normal; }
+        /* 캐릭터 */
+        .char-wrap { position:relative; width:80px; height:80px; margin:0 auto 8px; background:transparent; }
+        .part { position:absolute; top:0; left:0; width:100%; height:100%; }
+        .body,.head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
+        .head { z-index:2; }
+        .eyes { z-index:3; object-fit:contain; }
 
-        .compare-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-        }
-        .compare-card {
-            background: #f9f9f9; border: 2px solid #eee;
-            border-radius: 14px; padding: 14px; text-align: center;
-        }
-        .compare-card.target-card-result { border-color: #66bb6a; background: #f1f8e9; }
-        .compare-card.final-card { }
-        .compare-card.final-card.matched { border-color: #43a047; background: #e8f5e9; }
-        .compare-card.final-card.failed  { border-color: #b0bec5; background: #f5f7f8; }
+        /* 조건 리스트 */
+        .trait-check-list { list-style:none; margin:10px 0 0; padding:0; }
+        .trait-check-list li { display:flex; align-items:center; gap:7px; font-size:13px; padding:4px 0; color:#444; }
+        .trait-check-list li.ok   { color:#1F7A4D; font-weight:bold; }
+        .trait-check-list li.fail { color:#b0bec5; }
+        .success-badge { display:inline-block; background:#1F7A4D; color:white; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold; margin-top:5px; }
 
-        .compare-label { font-size: 12px; color: #888; margin-bottom: 8px; font-weight: bold; }
-
-        /* 캐릭터 표시 */
-        .char-wrap {
-            position: relative; width: 80px; height: 80px;
-            margin: 0 auto 8px; background: transparent;
-        }
-        .part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .body, .head {
-            -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
-            mask-size: contain; mask-repeat: no-repeat; mask-position: center; z-index: 1;
-        }
-        .head { z-index: 2; }
-        .eyes { z-index: 3; object-fit: contain; }
-
-        /* 조건 체크 리스트 */
-        .trait-check-list { list-style: none; margin: 10px 0 0; padding: 0; }
-        .trait-check-list li {
-            display: flex; align-items: center; gap: 7px;
-            font-size: 13px; padding: 4px 0; color: #444;
-        }
-        .trait-check-list li .check-icon { font-size: 15px; flex-shrink: 0; }
-        .trait-check-list li.ok   { color: #1F7A4D; font-weight: bold; }
-        .trait-check-list li.fail { color: #b0bec5; }
-
-        /* 형질 시각 */
-        .trait-visual-inline { vertical-align: middle; }
-
-        /* 성공 배지 */
-        .success-badge {
-            display: inline-block;
-            background: #1F7A4D; color: white;
-            padding: 5px 14px; border-radius: 20px;
-            font-size: 13px; font-weight: bold; margin-top: 6px;
-        }
-
-        /* 이름 짓기 (성공 시) */
-        .name-section {
-            background: #f9f9f9; border-radius: 12px;
-            padding: 15px; text-align: center; margin-bottom: 18px;
-        }
-        .name-section p { font-size: 13px; color: #666; margin: 0 0 10px; }
-        .name-section input {
-            width: 70%; padding: 9px 12px; font-size: 15px;
-            border: 2px solid #ddd; border-radius: 8px;
-            text-align: center; box-sizing: border-box; margin-bottom: 8px;
-        }
-        .name-section input:focus { outline: none; border-color: #66bb6a; }
-        .name-section button {
-            padding: 9px 20px; font-size: 13px;
-            background: #66bb6a; color: white;
-            border: none; border-radius: 8px; cursor: pointer;
-        }
-        .final-name-display { font-size: 20px; font-weight: bold; color: #1F7A4D; margin-top: 6px; }
+        /* 이름 짓기 */
+        .name-section { background:#f9f9f9; border-radius:12px; padding:14px; text-align:center; margin-bottom:16px; }
+        .name-section p  { font-size:13px; color:#666; margin:0 0 10px; }
+        .name-section input { width:70%; padding:9px 12px; font-size:15px; border:2px solid #ddd; border-radius:8px; text-align:center; box-sizing:border-box; margin-bottom:8px; }
+        .name-section input:focus { outline:none; border-color:#66bb6a; }
+        .name-section button { padding:9px 20px; font-size:13px; background:#66bb6a; color:white; border:none; border-radius:8px; cursor:pointer; }
+        .final-name-display { font-size:20px; font-weight:bold; color:#1F7A4D; margin-top:5px; }
 
         /* 버튼 */
-        .action-buttons { display: flex; flex-direction: column; gap: 8px; }
-        .btn {
-            padding: 12px; font-size: 14px; border: none;
-            border-radius: 10px; cursor: pointer; font-weight: bold;
-            transition: all 0.2s; width: 100%;
-        }
-        .btn-primary   { background: linear-gradient(135deg, #81c784, #43a047); color: white; }
-        .btn-secondary { background: #f1f3f4; color: #333; }
-        .btn-primary:hover   { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(67,160,71,0.35); }
-        .btn-secondary:hover { background: #e0e3e5; }
+        .action-buttons { display:flex; flex-direction:column; gap:8px; }
+        .btn { padding:12px; font-size:14px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; transition:all 0.2s; width:100%; }
+        .btn-primary   { background:linear-gradient(135deg,#81c784,#43a047); color:white; }
+        .btn-secondary { background:#f1f3f4; color:#333; }
+        .btn-primary:hover   { transform:translateY(-2px); box-shadow:0 4px 12px rgba(67,160,71,0.35); }
+        .btn-secondary:hover { background:#e0e3e5; }
+
+        /* 가계도 모달 */
+        .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); overflow-y:auto; }
+        .modal-content { background:white; margin:40px auto; padding:20px; border-radius:15px; width:90%; max-width:500px; max-height:80vh; overflow-y:auto; box-sizing:border-box; }
+        .close-modal { float:right; cursor:pointer; font-size:24px; color:#999; }
+        .close-modal:hover { color:#333; }
+        .tree-node { background:#f9f9f9; padding:10px; margin:10px 0; border-radius:12px; border-left:5px solid #66bb6a; }
+        .tree-node-current { border-left-color:#1F7A4D; background:#E4EBE7; }
+        .tree-character { display:inline-block; position:relative; width:50px; height:50px; border:1px solid #ddd; vertical-align:middle; background:transparent; margin-right:5px; }
+        .parent-visual-row { margin-top:8px; display:flex; align-items:center; gap:5px; padding-top:8px; border-top:1px dashed #ccc; flex-wrap:wrap; font-size:12px; }
+        .mini-char { width:35px; height:35px; border:1px solid #eee; position:relative; }
+
+        /* 의뢰인 요약 */
+        .requester-summary { background:#f5f5f5; border-radius:12px; padding:12px 14px; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+        .req-mini { position:relative; width:48px; height:48px; flex-shrink:0; background:transparent; }
+        .req-mini .part { position:absolute; top:0; left:0; width:100%; height:100%; }
+        .req-mini .body,.req-mini .head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
+        .req-mini .head { z-index:2; }
+        .req-mini .eyes { z-index:3; object-fit:contain; }
     </style>
 </head>
 <body>
-    <div class="result-container" id="resultContainer">
-        <!-- JS로 채워짐 -->
+    <div class="result-container" id="resultContainer"></div>
+
+    <!-- 가계도 모달 -->
+    <div id="familyTreeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 style="display:flex;align-items:center;gap:8px;font-size:18px;margin:0 0 14px;">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/3D/deciduous_tree_3d.png" width="26" style="vertical-align:middle;">
+                우리 가계도
+            </h2>
+            <div id="familyTreeContent"></div>
+        </div>
     </div>
 
     <script>
         const COLORS     = ['#ffd2d2','#c1e2bd','#bcdff1','#a0a0a0','#b1bf62','#ebebeb','#91b5e8','#ffe39c','#c3eada','#edff59','#ffc4c4'];
         const TRAIT_NAMES = { body:'몸', head:'머리', eyes:'눈', color:'색깔' };
-
         let gameData = null;
 
-        window.onload = function () {
+        window.onload = function() {
             const raw = localStorage.getItem('jinmix_gameData');
-            if (!raw) { alert('게임 데이터가 없습니다.'); location.href = 'landing.html'; return; }
+            if (!raw) { alert('게임 데이터가 없습니다.'); location.href='index.html'; return; }
             gameData = JSON.parse(raw);
+            document.body.className = gameData.success ? 'success-bg' : 'fail-bg';
             renderResult();
         };
 
-        // ─── 형질 시각 HTML ───
-        function traitVisual(trait, value, size = 26) {
-            if (trait === 'eyes') {
-                return `<img src="images/eyes_${value}.png"
-                         style="width:${size}px;height:${size}px;object-fit:contain;vertical-align:middle;
-                                border-radius:4px;border:1px solid #eee;" class="trait-visual-inline">`;
-            }
-            if (trait === 'color') {
-                return `<span style="display:inline-block;width:${size}px;height:${size}px;
-                         background:${COLORS[value]};border-radius:50%;
-                         border:2px solid rgba(0,0,0,0.12);vertical-align:middle;
-                         flex-shrink:0;" class="trait-visual-inline"></span>`;
-            }
-            return `<span style="display:inline-block;width:${size}px;height:${size}px;
-                     -webkit-mask-image:url('images/${trait}_${value}.png');
-                     mask-image:url('images/${trait}_${value}.png');
-                     -webkit-mask-size:contain;mask-size:contain;
-                     -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-                     -webkit-mask-position:center;mask-position:center;
-                     background-color:#1F7A4D;vertical-align:middle;flex-shrink:0;" class="trait-visual-inline"></span>`;
+        function traitVisual(trait, value, size=26) {
+            if (trait==='eyes') return `<img src="images/eyes_${value}.png" style="width:${size}px;height:${size}px;object-fit:contain;vertical-align:middle;border-radius:4px;border:1px solid #eee;">`;
+            if (trait==='color') return `<span style="display:inline-block;width:${size}px;height:${size}px;background:${COLORS[value]};border-radius:50%;border:2px solid rgba(0,0,0,0.12);vertical-align:middle;"></span>`;
+            return `<span style="display:inline-block;width:${size}px;height:${size}px;-webkit-mask-image:url('images/${trait}_${value}.png');mask-image:url('images/${trait}_${value}.png');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;background-color:#1F7A4D;vertical-align:middle;"></span>`;
         }
 
-        // ─── 캐릭터 HTML ───
-        function charHTML(genes, size = 80) {
+        function charHTML(genes, size=80) {
             const c = COLORS[genes.color];
             return `<div class="char-wrap" style="width:${size}px;height:${size}px;">
                 <div class="part body" style="-webkit-mask-image:url('images/body_${genes.body}.png');mask-image:url('images/body_${genes.body}.png');background-color:${c};"></div>
                 <div class="part head" style="-webkit-mask-image:url('images/head_${genes.head}.png');mask-image:url('images/head_${genes.head}.png');background-color:${c};"></div>
-                <img src="images/eyes_${genes.eyes}.png" class="part eyes">
-            </div>`;
+                <img src="images/eyes_${genes.eyes}.png" class="part eyes"></div>`;
         }
 
-        // ─── 결과 렌더 ───
+        function getCharacterHTML(genes) {
+            const c = COLORS[genes.color];
+            return `<div class="part body" style="-webkit-mask-image:url('images/body_${genes.body}.png');mask-image:url('images/body_${genes.body}.png');background-color:${c};"></div>
+                    <div class="part head" style="-webkit-mask-image:url('images/head_${genes.head}.png');mask-image:url('images/head_${genes.head}.png');background-color:${c};"></div>
+                    <img src="images/eyes_${genes.eyes}.png" class="part eyes">`;
+        }
+
         function renderResult() {
-            const { success, successTurn, totalTurns,
-                    targetGenes, targetTraits, dialogueType,
-                    finalGenes, finalName } = gameData;
+            const { success, successTurn, targetGenes, targetTraits, dialogueType, requesterGenes, finalGenes, finalName } = gameData;
 
-            document.body.className = success ? 'success-bg' : 'fail-bg';
-
-            // 배너
-            const bannerEmoji = success ? '🎉' : '😢';
-            const bannerTitle = success ? `${successTurn}번째 시도에 성공!` : '이번엔 아쉽게...';
-            const bannerSub   = success
-                ? '이상형 외계인을 찾아냈어요!'
-                : `10번의 기회를 모두 썼지만 조건을 충족하지 못했어요`;
-
-            // 대사 재현 (어떤 조건이었는지)
             const dv0 = traitVisual(targetTraits[0], targetGenes[targetTraits[0]], 22);
             const dv1 = traitVisual(targetTraits[1], targetGenes[targetTraits[1]], 22);
-            const dialogueTxt = dialogueType === 0
-                ? `${dv0}&nbsp;와&nbsp;${dv1}&nbsp;을 갖춘 외계인을 찾고 있었어요`
-                : `${dv0}&nbsp;와&nbsp;${dv1}&nbsp;이 제 이상형이에요`;
+            const dialogueTxt = dialogueType===0 ? `${dv0}&nbsp;와&nbsp;${dv1}&nbsp;을 갖춘 외계인을 찾고 있었어요` : `${dv0}&nbsp;와&nbsp;${dv1}&nbsp;이 제 이상형이에요`;
 
-            // 조건 체크
             const checksHTML = targetTraits.map(t => {
-                const ok = finalGenes[t] === targetGenes[t];
-                return `<li class="${ok ? 'ok' : 'fail'}">
-                    <span class="check-icon">${ok ? '✅' : '❌'}</span>
-                    ${traitVisual(t, targetGenes[t], 22)}
-                    <span>${TRAIT_NAMES[t]}${ok ? ' — 충족!' : ' — 미충족'}</span>
-                </li>`;
+                const ok = finalGenes[t]===targetGenes[t];
+                return `<li class="${ok?'ok':'fail'}"><span>${ok?'✅':'❌'}</span>${traitVisual(t,targetGenes[t],22)}<span>${TRAIT_NAMES[t]}${ok?' — 충족!':' — 미충족'}</span></li>`;
             }).join('');
 
-            // 이름 짓기 섹션 (성공 시에만)
+            // 의뢰인 미니 캐릭터
+            const reqColor = requesterGenes ? COLORS[requesterGenes.color] : '#aaa';
+            const reqHTML  = requesterGenes ? `
+                <div class="req-mini">
+                    <div class="part body" style="-webkit-mask-image:url('images/body_${requesterGenes.body}.png');mask-image:url('images/body_${requesterGenes.body}.png');background-color:${reqColor};"></div>
+                    <div class="part head" style="-webkit-mask-image:url('images/head_${requesterGenes.head}.png');mask-image:url('images/head_${requesterGenes.head}.png');background-color:${reqColor};"></div>
+                    <img src="images/eyes_${requesterGenes.eyes}.png" class="part eyes">
+                </div>` : `<span style="font-size:36px;">👽</span>`;
+
             const nameSectionHTML = success ? `
                 <div class="name-section" id="nameSection">
                     <p>이 아가에게 이름을 지어주세요 💕</p>
-                    <input type="text" id="babyNameInput" placeholder="이름 입력" maxlength="10">
-                    <br>
+                    <input type="text" id="babyNameInput" placeholder="이름 입력" maxlength="10"><br>
                     <button onclick="confirmName()">✅ 확정</button>
                 </div>` : '';
 
-            // 캐릭터 비교
-            const finalCardCls = success ? 'matched' : 'failed';
-
             document.getElementById('resultContainer').innerHTML = `
                 <div class="result-banner">
-                    <span class="result-emoji">${bannerEmoji}</span>
-                    <h1 class="result-title ${success ? 'success' : 'fail'}">${bannerTitle}</h1>
-                    <p class="result-sub">${bannerSub}</p>
+                    <span class="result-emoji">${success?'🎉':'😢'}</span>
+                    <h1 class="result-title ${success?'success':'fail'}">${success?`${successTurn}번째 시도에 성공!`:'이번엔 아쉽게...'}</h1>
+                    <p class="result-sub">${success?'이상형 외계인을 찾아냈어요!':'10번의 기회를 모두 썼지만 조건을 충족하지 못했어요'}</p>
                 </div>
 
-                <!-- 의뢰 내용 -->
-                <div style="background:#f5f5f5;border-radius:12px;padding:12px 14px;margin-bottom:18px;
-                            font-size:13px;color:#555;display:flex;align-items:center;gap:10px;">
-                    <span style="font-size:22px;">👽</span>
-                    <span>${dialogueTxt}</span>
+                <div class="requester-summary">
+                    ${reqHTML}
+                    <span style="font-size:13px;color:#555;">${dialogueTxt}</span>
                 </div>
 
-                <!-- 캐릭터 비교 -->
-                <div class="compare-section">
-                    <h3>📊 조건 달성 현황</h3>
-                    <div class="compare-grid">
-                        <div class="compare-card target-card-result">
-                            <div class="compare-label">🎯 목표 조건</div>
-                            <ul class="trait-check-list">${checksHTML}</ul>
-                        </div>
-                        <div class="compare-card final-card ${finalCardCls}">
-                            <div class="compare-label">👶 최종 아가</div>
-                            ${charHTML(finalGenes, 80)}
-                            <div style="font-size:12px;color:#888;">${finalName}</div>
-                            ${success ? `<div class="success-badge">🎉 성공!</div>` : ''}
-                        </div>
+                <h3 style="font-size:13px;color:#888;font-weight:normal;margin:0 0 10px;">📊 조건 달성 현황</h3>
+                <div class="compare-grid">
+                    <div class="compare-card target-card-r">
+                        <div class="compare-label">🎯 목표 조건</div>
+                        <ul class="trait-check-list">${checksHTML}</ul>
+                    </div>
+                    <div class="compare-card ${success?'matched':''}">
+                        <div class="compare-label">👶 최종 아가</div>
+                        ${charHTML(finalGenes, 80)}
+                        <div style="font-size:12px;color:#888;">${finalName}</div>
+                        ${success?'<div class="success-badge">🎉 성공!</div>':''}
                     </div>
                 </div>
 
                 ${nameSectionHTML}
 
-                <!-- 액션 버튼 -->
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="restartGame()">🔁 다시 도전</button>
+                    <button class="btn btn-primary"   onclick="showFamilyTree()">🌳 가계도 보기</button>
+                    <button class="btn btn-secondary" onclick="goCollection()">🐾 내 외계인 보러가기</button>
+                    <button class="btn btn-secondary" onclick="restartGame()">🔁 다시 도전</button>
                     <button class="btn btn-secondary" onclick="goHome()">🏠 처음으로</button>
                 </div>`;
         }
@@ -257,27 +192,38 @@
         function confirmName() {
             const name = document.getElementById('babyNameInput').value.trim();
             if (!name) { alert('이름을 입력해주세요!'); return; }
-
-            // 컬렉션 저장
             const collection = JSON.parse(localStorage.getItem('jinmix_collection') || '[]');
             collection.push({ name, baby: gameData.finalGenes, date: new Date().toISOString() });
             localStorage.setItem('jinmix_collection', JSON.stringify(collection));
-
             const userName = localStorage.getItem('jinmix_userName') || '주인';
             const msgs = [`${userName}님 감사해요!`, `${userName}님 앞으로 잘 살게요.`, `사랑해요 ${userName}님`];
-            const msg = msgs[Math.floor(Math.random() * msgs.length)];
-
-            document.getElementById('nameSection').innerHTML =
-                `<div class="final-name-display">${name}</div>
-                 <div style="font-size:13px;color:#888;margin-top:6px;">${msg} 💕</div>`;
+            document.getElementById('nameSection').innerHTML = `<div class="final-name-display">${name}</div><div style="font-size:13px;color:#888;margin-top:5px;">${msgs[Math.floor(Math.random()*msgs.length)]} 💕</div>`;
         }
 
-        function restartGame() {
-            localStorage.removeItem('jinmix_gameData');
-            location.href = 'game.html';
+        function showFamilyTree() {
+            const familyTree = gameData.familyTree;
+            document.getElementById('familyTreeContent').innerHTML = familyTree.map((m, idx) => `
+                <div class="tree-node ${idx===familyTree.length-1?'tree-node-current':''}">
+                    <strong style="font-size:14px;">${m.generation}세대: ${m.name}</strong><br>
+                    <div class="tree-character">${getCharacterHTML(m.genes)}</div>
+                    ${m.parents ? `
+                        <div class="parent-visual-row">
+                            <small style="white-space:nowrap;">부모:</small>
+                            <div class="tree-character mini-char">${getCharacterHTML(m.parents.p1.genes)}</div>
+                            <span>+</span>
+                            <div class="tree-character mini-char">${getCharacterHTML(m.parents.p2.genes)}</div>
+                            <small style="flex-shrink:0;">(${m.parents.p1.name} & ${m.parents.p2.name})</small>
+                        </div>` : '<br><small style="font-size:11px;">초대 국왕</small>'}
+                </div>`).join('');
+            document.getElementById('familyTreeModal').style.display = 'block';
         }
 
-        function goHome() { location.href = 'landing.html'; }
+        function closeModal() { document.getElementById('familyTreeModal').style.display='none'; }
+        window.onclick = e => { if(e.target===document.getElementById('familyTreeModal')) closeModal(); };
+
+        function goCollection() { location.href='collection.html'; }
+        function restartGame()  { localStorage.removeItem('jinmix_gameData'); location.href='game.html'; }
+        function goHome()       { location.href='index.html'; }
     </script>
 </body>
 </html>
