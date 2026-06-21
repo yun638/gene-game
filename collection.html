@@ -6,174 +6,386 @@
     <title>진믹스 - 내 외계인들</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Arial, sans-serif; overflow: hidden; height: 100vh; background: linear-gradient(160deg, #e8f5e9 0%, #f3e5f5 50%, #e3f2fd 100%); }
+        body { font-family: Arial, sans-serif; overflow: hidden; height: 100vh; height: 100dvh; background: linear-gradient(160deg, #e8f5e9 0%, #f3e5f5 50%, #e3f2fd 100%); }
 
         /* 헤더 */
-        .header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-            background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(102,187,106,0.3);
-            padding: 10px 16px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .header-title { font-size: 16px; font-weight: bold; color: #1F7A4D; display: flex; align-items: center; gap: 6px; }
-        .header-count { font-size: 13px; color: #888; }
-        .home-btn { padding: 7px 14px; background: #1F7A4D; color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .home-btn:hover { background: #43a047; }
+        .header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(102,187,106,0.3); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; height: 50px; }
+        .header-title { font-size: 15px; font-weight: bold; color: #1F7A4D; }
+        .count-badge  { font-size: 12px; color: #888; margin-left: 6px; }
+        .gold-display { font-size: 14px; font-weight: bold; color: #b8860b; background: #fff9e6; border: 1.5px solid #ffd700; border-radius: 14px; padding: 3px 10px; margin-right: 8px; }
+        .home-btn { padding: 5px 12px; background: #1F7A4D; color: white; border: none; border-radius: 16px; cursor: pointer; font-size: 13px; }
 
         /* 무대 */
-        #stage { position: fixed; top: 54px; left: 0; right: 0; bottom: 0; }
+        #stage { position: fixed; top: 50px; left: 0; right: 0; bottom: 54px; overflow: hidden; }
 
         /* 걸어다니는 외계인 */
-        .walking-alien {
-            position: absolute;
-            cursor: pointer;
-            user-select: none;
-            transition: filter 0.2s;
-        }
-        .walking-alien:hover { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25)); }
-        .walking-alien.selected { filter: drop-shadow(0 0 12px #66bb6a); }
+        .walking-alien { position: absolute; cursor: pointer; user-select: none; text-align: center; }
+        .walking-alien.selected .alien-body-wrap { filter: drop-shadow(0 0 10px #66bb6a); }
 
-        .alien-body-wrap { transition: transform 0.3s; }
+        .alien-body-wrap { display: inline-block; transition: transform 0.25s; }
+        .alien-float { animation: float var(--dur, 2.2s) ease-in-out infinite; animation-delay: var(--delay, 0s); display: inline-block; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
 
-        /* 둥실둥실 애니메이션 */
-        .alien-float {
-            animation: float var(--dur, 2.2s) ease-in-out infinite;
-            animation-delay: var(--delay, 0s);
-        }
-        @keyframes float {
-            0%,100% { transform: translateY(0px); }
-            50%      { transform: translateY(-8px); }
-        }
+        @keyframes eatBounce  { 0%{transform:scale(1)} 30%{transform:scale(1.2)} 70%{transform:scale(0.95)} 100%{transform:scale(1)} }
+        @keyframes levelUpPop { 0%{transform:scale(1)} 30%{transform:scale(1.45) rotate(-5deg)} 60%{transform:scale(0.95)} 80%{transform:scale(1.05)} 100%{transform:scale(1)} }
 
-        /* 캐릭터 파츠 */
-        .char-stage { position: relative; width: 65px; height: 65px; }
-        .part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .char-stage { position: relative; display: block; transition: width 0.4s, height 0.4s; }
+        .part { position: absolute; top:0; left:0; width:100%; height:100%; }
         .c-body, .c-head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
-        .c-head { z-index: 2; }
-        .c-eyes { z-index: 3; object-fit: contain; }
+        .c-head { z-index:2; }
+        .c-eyes { z-index:3; object-fit:contain; }
 
-        /* 이름 태그 */
-        .alien-label {
-            text-align: center; font-size: 11px; color: #555;
-            background: rgba(255,255,255,0.85); border-radius: 8px;
-            padding: 2px 6px; margin-top: 2px;
-            white-space: nowrap; max-width: 80px; overflow: hidden; text-overflow: ellipsis;
-        }
+        /* 레벨 배지 */
+        .level-badge { display: inline-block; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 8px; margin-bottom: 2px; }
+        .level-badge.lv1   { background: #e0e0e0; color: #666; }
+        .level-badge.lv2   { background: #a5d6a7; color: #1F7A4D; }
+        .level-badge.lvmax { background: linear-gradient(135deg,#ffd700,#ff8c00); color: white; }
 
-        /* 정보 패널 */
-        .info-panel {
-            position: fixed; bottom: -120px; left: 0; right: 0; z-index: 300;
-            background: white; border-radius: 20px 20px 0 0;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-            padding: 16px 20px 24px;
-            transition: bottom 0.35s cubic-bezier(0.34,1.56,0.64,1);
-            display: flex; align-items: center; gap: 16px;
-        }
-        .info-panel.open { bottom: 0; }
-        .info-char { position: relative; width: 70px; height: 70px; flex-shrink: 0; background: transparent; }
-        .info-char .part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .info-char .c-body, .info-char .c-head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
-        .info-char .c-head { z-index: 2; }
-        .info-char .c-eyes { z-index: 3; object-fit: contain; }
-        .info-text h3 { font-size: 18px; color: #1F7A4D; margin-bottom: 4px; }
-        .info-text p  { font-size: 13px; color: #888; margin: 0; }
-        .info-close { margin-left: auto; padding: 8px 14px; background: #f0f0f0; border: none; border-radius: 20px; cursor: pointer; font-size: 13px; color: #555; flex-shrink: 0; }
+        .alien-label { font-size: 11px; color: #444; background: rgba(255,255,255,0.8); border-radius: 8px; padding: 1px 6px; margin-top: 2px; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 하단 바 */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 54px; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-top: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-around; padding: 0 10px; gap: 8px; z-index: 200; }
+        .bar-btn { flex: 1; padding: 9px 0; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.15s; }
+        .shop-btn { background: #fff3e0; color: #e65100; border: 1.5px solid #ffb74d; }
+        .inv-btn  { background: #e8f5e9; color: #1F7A4D; border: 1.5px solid #a5d6a7; }
+        .bar-gold { font-size: 14px; font-weight: bold; color: #b8860b; white-space: nowrap; }
 
         /* 빈 상태 */
-        #emptyState {
-            display: none; position: fixed; top: 54px; left: 0; right: 0; bottom: 0;
-            flex-direction: column; align-items: center; justify-content: center;
-            gap: 14px; text-align: center; padding: 30px;
-        }
-        #emptyState .empty-emoji { font-size: 60px; }
-        #emptyState h2 { font-size: 20px; color: #555; }
-        #emptyState p  { font-size: 14px; color: #999; line-height: 1.6; }
-        .play-btn { padding: 12px 28px; background: linear-gradient(135deg,#66bb6a,#43a047); color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 15px; font-weight: bold; margin-top: 6px; }
+        #emptyState { display: none; position: fixed; top: 50px; left: 0; right: 0; bottom: 54px; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 30px; }
+        #emptyState .empty-emoji { font-size: 56px; }
+        #emptyState h2 { font-size: 18px; color: #555; }
+        #emptyState p  { font-size: 13px; color: #999; line-height: 1.6; }
+        .play-btn { padding: 11px 26px; background: linear-gradient(135deg,#66bb6a,#43a047); color: white; border: none; border-radius: 22px; cursor: pointer; font-size: 14px; font-weight: bold; }
+
+        /* 토스트 */
+        .toast { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(10px); background: rgba(0,0,0,0.72); color: white; padding: 8px 18px; border-radius: 20px; font-size: 14px; opacity: 0; transition: all 0.3s; z-index: 600; pointer-events: none; white-space: nowrap; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* 정보 패널 */
+        .info-panel { position: fixed; bottom: -150px; left: 0; right: 0; z-index: 300; background: white; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); padding: 14px 18px 68px; transition: bottom 0.35s cubic-bezier(0.34,1.56,0.64,1); display: flex; align-items: center; gap: 14px; }
+        .info-panel.open { bottom: 0; }
+        .info-char { position: relative; width: 66px; height: 66px; flex-shrink: 0; background: transparent; }
+        .info-char .part { position: absolute; top:0; left:0; width:100%; height:100%; }
+        .info-char .c-body,.info-char .c-head { -webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;z-index:1; }
+        .info-char .c-head { z-index:2; }
+        .info-char .c-eyes { z-index:3; object-fit:contain; }
+        .info-text h3 { font-size: 17px; color: #1F7A4D; margin-bottom: 3px; }
+        .info-text p  { font-size: 12px; color: #888; margin: 1px 0; }
+        .info-close { margin-left: auto; padding: 7px 14px; background: #f0f0f0; border: none; border-radius: 16px; cursor: pointer; font-size: 13px; color: #555; flex-shrink: 0; align-self: flex-start; }
+
+        /* 인벤토리 패널 (하단 슬라이드) */
+        .inv-panel { position: fixed; bottom: -200px; left: 0; right: 0; z-index: 400; background: white; border-radius: 20px 20px 0 0; box-shadow: 0 -6px 24px rgba(0,0,0,0.18); padding: 14px 18px 68px; transition: bottom 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+        .inv-panel.open { bottom: 0; }
+        .inv-panel.dragging { opacity: 0.3; pointer-events: none; }
+        .inv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .inv-header span { font-size: 15px; font-weight: bold; color: #333; }
+        .inv-close { padding: 4px 10px; background: #f0f0f0; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; }
+        .inv-hint { font-size: 12px; color: #aaa; margin-bottom: 12px; }
+        .inv-items { display: flex; gap: 12px; flex-wrap: wrap; }
+        .inv-item { background: #f9f9f9; border: 2px solid #eee; border-radius: 14px; padding: 10px 16px; text-align: center; cursor: grab; user-select: none; min-width: 80px; }
+        .inv-item:active { cursor: grabbing; }
+        .inv-item-icon  { font-size: 36px; display: block; line-height: 1; }
+        .inv-item-count { font-size: 13px; color: #555; margin-top: 4px; }
+        .inv-empty { font-size: 13px; color: #bbb; }
+
+        /* 상점 모달 */
+        .modal { display: none; position: fixed; z-index: 500; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; }
+        .modal.open { display: flex; }
+        .modal-box { background: white; border-radius: 20px; padding: 22px 20px; width: 88%; max-width: 360px; animation: popIn 0.3s ease-out; }
+        @keyframes popIn { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:scale(1)} }
+        .modal-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 14px; text-align: center; }
+        .modal-gold  { text-align: center; font-size: 14px; color: #b8860b; background: #fff9e6; border-radius: 10px; padding: 7px; margin-bottom: 14px; font-weight: bold; }
+        .shop-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f9f9f9; border-radius: 12px; margin-bottom: 10px; }
+        .shop-item-icon  { font-size: 36px; }
+        .shop-item-info  { flex: 1; }
+        .shop-item-name  { font-size: 14px; font-weight: bold; color: #333; }
+        .shop-item-price { font-size: 12px; color: #888; }
+        .shop-buy-btn { padding: 8px 16px; background: #1F7A4D; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .modal-close { width: 100%; padding: 11px; background: #f1f3f4; color: #333; border: none; border-radius: 12px; font-size: 14px; cursor: pointer; font-weight: bold; margin-top: 4px; }
+
+        /* 드래그 중인 음식 */
+        #dragFood { position: fixed; z-index: 9999; pointer-events: none; font-size: 44px; transform: translate(-50%, -50%); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35)); display: none; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="header-title">🐾 내 외계인들</div>
-        <div class="header-count" id="headerCount"></div>
-        <button class="home-btn" onclick="location.href='index.html'">🏠 홈</button>
+        <div style="display:flex;align-items:center;">
+            <span class="header-title">🐾 내 외계인들</span>
+            <span class="count-badge" id="countBadge"></span>
+        </div>
+        <div style="display:flex;align-items:center;">
+            <span class="gold-display">💰 <span id="goldDisplay">0</span></span>
+            <button class="home-btn" onclick="location.href='index.html'">🏠</button>
+        </div>
     </div>
 
     <div id="stage"></div>
 
-    <!-- 빈 상태 -->
     <div id="emptyState">
         <div class="empty-emoji">🌌</div>
         <h2>아직 외계인이 없어요</h2>
-        <p>게임을 플레이해서<br>이상형 외계인을 찾아보세요!</p>
+        <p>게임을 클리어하면<br>외계인을 데려올 수 있어요!</p>
         <button class="play-btn" onclick="location.href='index.html'">🎯 게임 시작하기</button>
     </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 드래그 음식 -->
+    <div id="dragFood">🍎</div>
 
     <!-- 정보 패널 -->
     <div class="info-panel" id="infoPanel">
         <div class="info-char" id="infoChar"></div>
         <div class="info-text">
             <h3 id="infoName">이름</h3>
-            <p id="infoDate">수집일</p>
+            <p id="infoLevel">Lv.1</p>
+            <p id="infoDate"></p>
         </div>
         <button class="info-close" onclick="closeInfo()">닫기</button>
+    </div>
+
+    <!-- 인벤토리 패널 -->
+    <div class="inv-panel" id="invPanel">
+        <div class="inv-header">
+            <span>🎒 아이템</span>
+            <button class="inv-close" onclick="closeInventory()">✕</button>
+        </div>
+        <div class="inv-hint">꾹 눌러서 외계인에게 드래그하세요!</div>
+        <div class="inv-items" id="invItems"></div>
+    </div>
+
+    <!-- 상점 모달 -->
+    <div class="modal" id="shopModal">
+        <div class="modal-box">
+            <div class="modal-title">🛒 상점</div>
+            <div class="modal-gold">💰 <span id="shopGold">0</span> 골드 보유</div>
+            <div class="shop-item">
+                <span class="shop-item-icon">🍎</span>
+                <div class="shop-item-info">
+                    <div class="shop-item-name">사과</div>
+                    <div class="shop-item-price">💰 골드 1개</div>
+                </div>
+                <button class="shop-buy-btn" onclick="buyItem('apple')">구매</button>
+            </div>
+            <button class="modal-close" onclick="closeShop()">닫기</button>
+        </div>
+    </div>
+
+    <!-- 하단 바 -->
+    <div class="bottom-bar">
+        <span class="bar-gold">💰 <span id="barGold">0</span></span>
+        <button class="bar-btn shop-btn" onclick="openShop()">🛒 상점</button>
+        <button class="bar-btn inv-btn"  onclick="openInventory()">🎒 아이템</button>
     </div>
 
     <script>
         const COLORS = ['#ffd2d2','#c1e2bd','#bcdff1','#a0a0a0','#b1bf62','#ebebeb','#91b5e8','#ffe39c','#c3eada','#edff59','#ffc4c4'];
 
-        let aliens  = [];
-        let stageEl = null;
-        let selectedAlien = null;
+        // ─── 데이터 헬퍼 ───
+        const getGold       = ()    => parseInt(localStorage.getItem('jinmix_gold') || '0');
+        const setGold       = n     => localStorage.setItem('jinmix_gold', Math.max(0, n));
+        const getInventory  = ()    => JSON.parse(localStorage.getItem('jinmix_inventory') || '{}');
+        const setInventory  = inv   => localStorage.setItem('jinmix_inventory', JSON.stringify(inv));
+        const getCollection = ()    => JSON.parse(localStorage.getItem('jinmix_collection') || '[]');
+        const setCollection = coll  => localStorage.setItem('jinmix_collection', JSON.stringify(coll));
 
-        // 컬렉션에서 유전자 추출 (포맷 호환)
+        // ─── 레벨 시스템 ───
+        function getLevelInfo(fc) {
+            if (fc >= 8) return { label: 'Lv.MAX', cls: 'lvmax', size: 110 };
+            if (fc >= 3) return { label: 'Lv.2',   cls: 'lv2',   size: 85  };
+            return            { label: 'Lv.1',   cls: 'lv1',   size: 65  };
+        }
+
+        // ─── 유전자 추출 ───
         function getGenes(item) {
-            if (item.baby && item.baby.body !== undefined) return item.baby;        // { baby: genes }
-            if (item.baby && item.baby.genes)              return item.baby.genes;  // { baby: { genes } }
+            if (item.baby && item.baby.body !== undefined) return item.baby;
+            if (item.baby && item.baby.genes)              return item.baby.genes;
             if (item.genes)                                return item.genes;
             return null;
         }
-        function getName(item) {
-            return item.name || (item.baby && item.baby.name) || '이름 없음';
+        function getName(item) { return item.name || (item.baby && item.baby.name) || '이름 없음'; }
+        function getDate(item) { return item.date ? new Date(item.date).toLocaleDateString('ko-KR') : ''; }
+
+        // ─── 토스트 ───
+        function showToast(msg, ms=2000) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._tid);
+            t._tid = setTimeout(() => t.classList.remove('show'), ms);
         }
-        function getDate(item) {
-            return item.date ? new Date(item.date).toLocaleDateString('ko-KR') : '';
+
+        // ─── 골드 표시 업데이트 ───
+        function updateGoldUI() {
+            const g = getGold();
+            document.getElementById('goldDisplay').textContent = g;
+            document.getElementById('barGold').textContent     = g;
+            document.getElementById('shopGold').textContent    = g;
         }
+
+        // ─── 인벤토리 UI ───
+        function updateInventoryUI() {
+            const inv  = getInventory();
+            const cont = document.getElementById('invItems');
+            const items = Object.entries(inv).filter(([,n]) => n > 0);
+            if (items.length === 0) {
+                cont.innerHTML = '<span class="inv-empty">아이템이 없어요. 상점에서 구매하세요!</span>';
+                return;
+            }
+            const icons = { apple: '🍎' };
+            cont.innerHTML = items.map(([type, count]) => `
+                <div class="inv-item" id="invItem_${type}" data-type="${type}">
+                    <span class="inv-item-icon">${icons[type] || '❓'}</span>
+                    <div class="inv-item-count">× ${count}</div>
+                </div>`).join('');
+            // 드래그 이벤트 등록
+            items.forEach(([type]) => {
+                const el = document.getElementById(`invItem_${type}`);
+                if (!el) return;
+                el.addEventListener('touchstart', e => startDrag(type, e), { passive: false });
+                el.addEventListener('mousedown',  e => startDrag(type, e));
+            });
+        }
+
+        // ─── 상점 ───
+        function openShop()  { updateGoldUI(); document.getElementById('shopModal').classList.add('open'); }
+        function closeShop() { document.getElementById('shopModal').classList.remove('open'); }
+        function buyItem(type) {
+            const prices = { apple: 1 };
+            const gold = getGold();
+            if (gold < prices[type]) { showToast('골드가 부족해요 😢'); return; }
+            setGold(gold - prices[type]);
+            const inv = getInventory();
+            inv[type] = (inv[type] || 0) + 1;
+            setInventory(inv);
+            updateGoldUI();
+            updateInventoryUI();
+            showToast('🍎 사과를 구매했어요!');
+        }
+
+        // ─── 인벤토리 패널 ───
+        function openInventory()  { updateInventoryUI(); document.getElementById('invPanel').classList.add('open'); closeInfo(); }
+        function closeInventory() { document.getElementById('invPanel').classList.remove('open'); }
+
+        // ─── 드래그 ───
+        let draggingType = null;
+        const dragFoodEl = document.getElementById('dragFood');
+
+        function startDrag(type, e) {
+            const inv = getInventory();
+            if (!inv[type] || inv[type] <= 0) { showToast('아이템이 없어요!'); return; }
+            e.preventDefault();
+            draggingType = type;
+            const icons = { apple: '🍎' };
+            dragFoodEl.textContent = icons[type] || '❓';
+            dragFoodEl.style.display = 'block';
+            document.getElementById('invPanel').classList.add('dragging');
+            const pt = e.touches ? e.touches[0] : e;
+            dragFoodEl.style.left = pt.clientX + 'px';
+            dragFoodEl.style.top  = pt.clientY + 'px';
+        }
+
+        function onPointerMove(e) {
+            if (!draggingType) return;
+            e.preventDefault();
+            const pt = e.touches ? e.touches[0] : e;
+            dragFoodEl.style.left = pt.clientX + 'px';
+            dragFoodEl.style.top  = pt.clientY + 'px';
+        }
+
+        function onPointerUp(e) {
+            if (!draggingType) return;
+            dragFoodEl.style.display = 'none';
+            document.getElementById('invPanel').classList.remove('dragging');
+
+            const pt  = e.changedTouches ? e.changedTouches[0] : e;
+            dragFoodEl.style.display = 'none';
+            const hitEl = document.elementFromPoint(pt.clientX, pt.clientY);
+            const alienEl = hitEl?.closest('[data-alien-idx]');
+
+            if (alienEl) {
+                const idx = parseInt(alienEl.dataset.alienIdx);
+                feedAlien(idx, draggingType);
+            } else {
+                showToast('외계인 위에 올려놓으세요! 🍎');
+            }
+
+            draggingType = null;
+        }
+
+        document.addEventListener('touchmove', onPointerMove, { passive: false });
+        document.addEventListener('touchend',  onPointerUp);
+        document.addEventListener('mousemove', onPointerMove);
+        document.addEventListener('mouseup',   onPointerUp);
+
+        // ─── 먹이 주기 ───
+        function feedAlien(idx, foodType) {
+            const inv = getInventory();
+            if (!inv[foodType] || inv[foodType] <= 0) { showToast('아이템이 없어요! 상점에서 구매하세요 🛒'); return; }
+
+            inv[foodType]--;
+            if (inv[foodType] <= 0) delete inv[foodType];
+            setInventory(inv);
+
+            const coll = getCollection();
+            if (!coll[idx]) return;
+            const oldFc = coll[idx].feedCount || 0;
+            coll[idx].feedCount = oldFc + 1;
+            setCollection(coll);
+
+            const alien = aliens[idx];
+            if (alien) alien.onFed(oldFc, coll[idx].feedCount);
+
+            updateInventoryUI();
+            updateGoldUI();
+        }
+
+        // ─── 걸어다니는 외계인 ───
+        const aliens  = [];
+        let stageEl   = null;
 
         class WalkingAlien {
-            constructor(data) {
-                this.genes = getGenes(data);
-                this.name  = getName(data);
-                this.date  = getDate(data);
+            constructor(data, collIdx) {
+                this.genes    = getGenes(data);
+                this.name     = getName(data);
+                this.date     = getDate(data);
+                this.feedCount = data.feedCount || 0;
+                this.collIdx  = collIdx;
                 if (!this.genes) return;
 
-                const W = stageEl.clientWidth  - 80;
-                const H = stageEl.clientHeight - 100;
-                this.x = Math.random() * W;
-                this.y = Math.random() * H;
+                const W = stageEl.clientWidth  - 120;
+                const H = stageEl.clientHeight - 120;
+                this.x  = 20 + Math.random() * W;
+                this.y  = 20 + Math.random() * H;
 
-                const speed = 0.4 + Math.random() * 0.8;
+                const spd   = 0.35 + Math.random() * 0.7;
                 const angle = Math.random() * Math.PI * 2;
-                this.vx = Math.cos(angle) * speed;
-                this.vy = Math.sin(angle) * speed;
+                this.vx = Math.cos(angle) * spd;
+                this.vy = Math.sin(angle) * spd;
 
-                this.wanderCount = Math.floor(Math.random() * 200) + 80;
-                this.dur   = (1.8 + Math.random() * 1.2).toFixed(1);
-                this.delay = (Math.random() * 2).toFixed(1);
+                this.wander = Math.floor(Math.random() * 200) + 80;
+                this.dur    = (1.8 + Math.random() * 1.2).toFixed(1);
+                this.delay  = (Math.random() * 2.5).toFixed(1);
 
                 this.el = this.createEl();
             }
 
+            getLvInfo() { return getLevelInfo(this.feedCount); }
+
             createEl() {
                 const g     = this.genes;
                 const color = COLORS[g.color];
+                const lv    = this.getLvInfo();
+                const sz    = lv.size;
                 const el    = document.createElement('div');
                 el.className = 'walking-alien';
+                el.dataset.alienIdx = this.collIdx;
                 el.style.cssText = `left:${this.x}px; top:${this.y}px;`;
                 el.innerHTML = `
+                    <div class="level-badge ${lv.cls}">${lv.label}</div><br>
                     <div class="alien-body-wrap">
-                        <div class="alien-float" style="--dur:${this.dur}s; --delay:${this.delay}s;">
-                            <div class="char-stage">
+                        <div class="alien-float" style="--dur:${this.dur}s;--delay:${this.delay}s;">
+                            <div class="char-stage" style="width:${sz}px;height:${sz}px;">
                                 <div class="part c-body" style="-webkit-mask-image:url('images/body_${g.body}.png');mask-image:url('images/body_${g.body}.png');background-color:${color};"></div>
                                 <div class="part c-head" style="-webkit-mask-image:url('images/head_${g.head}.png');mask-image:url('images/head_${g.head}.png');background-color:${color};"></div>
                                 <img src="images/eyes_${g.eyes}.png" class="part c-eyes">
@@ -186,89 +398,100 @@
                 return el;
             }
 
-            update() {
-                const W = stageEl.clientWidth  - 80;
-                const H = stageEl.clientHeight - 100;
+            onFed(oldFc, newFc) {
+                this.feedCount = newFc;
+                const oldLv = getLevelInfo(oldFc);
+                const newLv = getLevelInfo(newFc);
 
-                this.x += this.vx;
-                this.y += this.vy;
+                // 사이즈 업데이트
+                const stage = this.el.querySelector('.char-stage');
+                if (stage) { stage.style.width = newLv.size + 'px'; stage.style.height = newLv.size + 'px'; }
 
-                if (this.x <= 0)  { this.x = 0;  this.vx =  Math.abs(this.vx); }
-                if (this.x >= W)  { this.x = W;  this.vx = -Math.abs(this.vx); }
-                if (this.y <= 0)  { this.y = 0;  this.vy =  Math.abs(this.vy); }
-                if (this.y >= H)  { this.y = H;  this.vy = -Math.abs(this.vy); }
+                // 배지 업데이트
+                const badge = this.el.querySelector('.level-badge');
+                if (badge) { badge.textContent = newLv.label; badge.className = `level-badge ${newLv.cls}`; }
 
-                // 가끔 방향 바꾸기
-                this.wanderCount--;
-                if (this.wanderCount <= 0) {
-                    this.wanderCount = Math.floor(Math.random() * 200) + 80;
-                    const speed = 0.4 + Math.random() * 0.8;
-                    const angle = Math.random() * Math.PI * 2;
-                    this.vx = Math.cos(angle) * speed;
-                    this.vy = Math.sin(angle) * speed;
+                // 애니메이션
+                const wrap = this.el.querySelector('.alien-body-wrap');
+                if (wrap) {
+                    const anim = oldLv.label !== newLv.label ? 'levelUpPop 0.7s ease' : 'eatBounce 0.4s ease';
+                    wrap.style.animation = 'none';
+                    void wrap.offsetWidth;
+                    wrap.style.animation = anim;
+                    setTimeout(() => { if(wrap) wrap.style.animation = ''; }, 800);
                 }
 
-                this.el.style.left = this.x + 'px';
-                this.el.style.top  = this.y + 'px';
-
-                // 좌우 반전
-                const wrap = this.el.querySelector('.alien-body-wrap');
-                if (wrap) wrap.style.transform = `scaleX(${this.vx >= 0 ? 1 : -1})`;
+                if (oldLv.label !== newLv.label) showToast(`${this.name} 레벨 업! 🎉`);
+                else showToast('냠냠 😋');
             }
 
             showInfo() {
-                // 강조
                 document.querySelectorAll('.walking-alien').forEach(e => e.classList.remove('selected'));
                 this.el.classList.add('selected');
-                selectedAlien = this;
-
-                // 캐릭터 렌더
                 const g     = this.genes;
                 const color = COLORS[g.color];
+                const lv    = this.getLvInfo();
                 document.getElementById('infoChar').innerHTML = `
                     <div class="part c-body" style="-webkit-mask-image:url('images/body_${g.body}.png');mask-image:url('images/body_${g.body}.png');background-color:${color};"></div>
                     <div class="part c-head" style="-webkit-mask-image:url('images/head_${g.head}.png');mask-image:url('images/head_${g.head}.png');background-color:${color};"></div>
                     <img src="images/eyes_${g.eyes}.png" class="part c-eyes">`;
-
-                document.getElementById('infoName').textContent = this.name;
-                document.getElementById('infoDate').textContent = this.date ? `수집일: ${this.date}` : '';
+                document.getElementById('infoName').textContent  = this.name;
+                document.getElementById('infoLevel').textContent = `${lv.label} · 먹이 ${this.feedCount}개 먹음`;
+                document.getElementById('infoDate').textContent  = this.date ? `수집일: ${this.date}` : '';
                 document.getElementById('infoPanel').classList.add('open');
+                closeInventory();
+            }
+
+            update() {
+                const W = stageEl.clientWidth  - 120;
+                const H = stageEl.clientHeight - 120;
+                this.x += this.vx; this.y += this.vy;
+                if (this.x <= 0)  { this.x = 0;  this.vx =  Math.abs(this.vx); }
+                if (this.x >= W)  { this.x = W;  this.vx = -Math.abs(this.vx); }
+                if (this.y <= 0)  { this.y = 0;  this.vy =  Math.abs(this.vy); }
+                if (this.y >= H)  { this.y = H;  this.vy = -Math.abs(this.vy); }
+                this.wander--;
+                if (this.wander <= 0) {
+                    this.wander = Math.floor(Math.random() * 200) + 80;
+                    const spd = 0.35 + Math.random() * 0.7, ang = Math.random() * Math.PI * 2;
+                    this.vx = Math.cos(ang) * spd; this.vy = Math.sin(ang) * spd;
+                }
+                this.el.style.left = this.x + 'px';
+                this.el.style.top  = this.y + 'px';
+                const wrap = this.el.querySelector('.alien-body-wrap');
+                if (wrap) wrap.style.transform = `scaleX(${this.vx >= 0 ? 1 : -1})`;
             }
         }
 
         function closeInfo() {
             document.getElementById('infoPanel').classList.remove('open');
             document.querySelectorAll('.walking-alien').forEach(e => e.classList.remove('selected'));
-            selectedAlien = null;
         }
 
-        function loop() {
-            aliens.forEach(a => a.update());
-            requestAnimationFrame(loop);
-        }
+        function loop() { aliens.forEach(a => a.update()); requestAnimationFrame(loop); }
 
         window.onload = function() {
             stageEl = document.getElementById('stage');
-            const collection = JSON.parse(localStorage.getItem('jinmix_collection') || '[]');
+            const collection = getCollection();
+            updateGoldUI();
 
             if (collection.length === 0) {
                 document.getElementById('emptyState').style.display = 'flex';
                 return;
             }
 
-            document.getElementById('headerCount').textContent = `총 ${collection.length}마리`;
+            document.getElementById('countBadge').textContent = `${collection.length}마리`;
 
-            collection.forEach(data => {
-                const a = new WalkingAlien(data);
-                if (a.genes) aliens.push(a);
+            collection.forEach((data, idx) => {
+                const a = new WalkingAlien(data, idx);
+                aliens.push(a);
             });
 
             requestAnimationFrame(loop);
         };
 
-        // 무대 클릭 시 패널 닫기
         document.getElementById('stage').addEventListener('click', e => {
-            if (!e.target.closest('.walking-alien')) closeInfo();
+            if (!e.target.closest('[data-alien-idx]')) closeInfo();
         });
     </script>
 </body>
