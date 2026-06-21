@@ -3,197 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>진믹스 - 10번째 아가를 찾아서</title>
+    <title>진믹스 - 이상형을 찾아라!</title>
     <style>
         body {
             font-family: 'Noto Sans KR', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            margin: 0; padding: 0; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #81c784 0%, #43a047 100%);
         }
-        
+
         .landing-container {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            animation: fadeIn 0.6s ease-out;
+            background: white; padding: 36px 28px;
+            border-radius: 22px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.28);
+            max-width: 420px; width: 90%; text-align: center;
+            animation: fadeIn 0.55s ease-out;
         }
-        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        
+
         .title {
-            font-size: 36px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            font-size: 32px; font-weight: bold; color: #1a1a1a;
+            margin-bottom: 6px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        
         .subtitle {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 35px;
-            line-height: 1.6;
+            font-size: 15px; color: #666;
+            margin-bottom: 28px; line-height: 1.6;
         }
-        
+
+        /* 의뢰인 프리뷰 */
+        .requester-preview {
+            background: linear-gradient(135deg, #f1f8e9, #e8f5e9);
+            border: 2px solid #a5d6a7; border-radius: 14px;
+            padding: 16px; margin-bottom: 24px;
+            display: flex; align-items: center; gap: 12px; text-align: left;
+        }
+        .req-icon { font-size: 34px; flex-shrink: 0; }
+        .req-bubble {
+            background: white; border: 1.5px solid #c8e6c9;
+            border-radius: 12px 12px 12px 4px;
+            padding: 9px 12px; font-size: 13px; color: #333;
+            line-height: 1.6; flex: 1;
+        }
+        .req-bubble strong { color: #1F7A4D; }
+
+        /* 룰 섹션 */
         .rules {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            text-align: left;
+            background: #f8f9fa; padding: 20px;
+            border-radius: 14px; margin-bottom: 24px; text-align: left;
         }
-        
-        .rules h3 {
-            margin: 0 0 15px 0;
-            font-size: 16px;
-            color: #66bb6a;
-            text-align: center;
-        }
-        
+        .rules h3 { margin: 0 0 13px; font-size: 14px; color: #43a047; text-align: center; }
         .rule-item {
-            margin: 12px 0;
-            padding-left: 25px;
-            position: relative;
-            font-size: 15px;
-            color: #444;
-            line-height: 1.6;
+            margin: 10px 0; padding-left: 22px;
+            position: relative; font-size: 14px; color: #444; line-height: 1.55;
         }
-        
-        .rule-item:before {
-            content: "•";
-            position: absolute;
-            left: 8px;
-            color: #66bb6a;
-            font-size: 20px;
+        .rule-item::before {
+            content: "•"; position: absolute; left: 6px;
+            color: #66bb6a; font-size: 18px;
         }
-        
-        .input-section {
-            margin-bottom: 25px;
-        }
-        
-        .input-section label {
-            display: block;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-            text-align: left;
-        }
-        
+        .rule-item .highlight { color: #1F7A4D; font-weight: bold; }
+
+        /* 이름 입력 */
+        .input-section { margin-bottom: 20px; }
+        .input-section label { display: block; font-size: 13px; color: #666; margin-bottom: 7px; text-align: left; }
         .input-section input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
+            width: 100%; padding: 11px 13px; font-size: 15px;
+            border: 2px solid #ddd; border-radius: 8px;
+            box-sizing: border-box; transition: border-color 0.25s;
         }
-        
-        .input-section input:focus {
-            outline: none;
-            border-color: #66bb6a;
-        }
-        
-        .start-button {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
+        .input-section input:focus { outline: none; border-color: #66bb6a; }
+
+        /* 시작 버튼 */
+        .start-btn {
+            width: 100%; padding: 14px; font-size: 17px; font-weight: bold;
             color: white;
-            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+            border: none; border-radius: 11px; cursor: pointer;
+            transition: transform 0.18s, box-shadow 0.18s;
         }
-        
-        .start-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(129, 199, 132, 0.4);
-        }
-        
-        .start-button:active {
-            transform: translateY(0);
-        }
-        
-        .start-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .highlight {
-            color: #1F7A4D;
-            font-weight: bold;
-        }
+        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(67,160,71,0.38); }
+        .start-btn:active { transform: translateY(0); }
     </style>
 </head>
 <body>
     <div class="landing-container">
         <div class="title">
-            <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="40">
-            GeneMix
+            <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="38">
+            진믹스
         </div>
-        
-        <div class="subtitle">
-            <span class="highlight">10번째 아가</span>는<br>당신의 행운 아가입니다 🍀
+        <div class="subtitle">랜덤 이상형 외계인의 조건을<br>10번 안에 맞춰보세요! 👽</div>
+
+        <!-- 의뢰 미리보기 -->
+        <div class="requester-preview">
+            <div class="req-icon">👽</div>
+            <div class="req-bubble">
+                게임이 시작되면 제가 원하는<br>
+                <strong>2가지 조건</strong>을 알려드릴게요.<br>
+                그 조건에 딱 맞는 아가를 만들어주세요!
+            </div>
         </div>
-        
+
+        <!-- 게임 룰 -->
         <div class="rules">
             <h3>🎮 게임 룰</h3>
-            <div class="rule-item">아가는 하나씩 태어나요</div>
-            <div class="rule-item">부모의 형질이 하나씩 섞여요</div>
-            <div class="rule-item"><span class="highlight">10번째 아가</span>만 내 품으로 와요</div>
+            <div class="rule-item">게임 시작 시 <span class="highlight">랜덤 이상형 조건</span> 2가지가 공개돼요</div>
+            <div class="rule-item">배우자를 골라 아가를 교배해요</div>
+            <div class="rule-item"><span class="highlight">조건 2가지를 모두 충족</span>하면 성공!</div>
+            <div class="rule-item">기회는 <span class="highlight">딱 10번</span>뿐이에요</div>
         </div>
-        
+
+        <!-- 이름 입력 -->
         <div class="input-section">
-            <label for="userName">이름을 입력해주세요</label>
+            <label for="userName">플레이어 이름을 입력해주세요</label>
             <input type="text" id="userName" placeholder="예: 홍길동" maxlength="10">
         </div>
-        
-        <button class="start-button" onclick="startGame()">🎯 시작하기</button>
+
+        <button class="start-btn" onclick="startGame()">🎯 이상형 찾기 시작!</button>
     </div>
-    
+
     <script>
-        // Enter 키로도 시작 가능
-        document.getElementById('userName').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                startGame();
-            }
+        document.getElementById('userName').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') startGame();
         });
-        
+
         function startGame() {
-            const userName = document.getElementById('userName').value.trim();
-            
-            if (!userName) {
-                alert('이름을 입력해주세요! 😊');
-                document.getElementById('userName').focus();
-                return;
-            }
-            
-            // 로컬 스토리지에 유저 이름 저장
-            localStorage.setItem('jinmix_userName', userName);
-            
-            // 게임 데이터 초기화
+            const name = document.getElementById('userName').value.trim();
+            if (!name) { alert('이름을 입력해주세요! 😊'); document.getElementById('userName').focus(); return; }
+            localStorage.setItem('jinmix_userName', name);
             localStorage.removeItem('jinmix_gameData');
-            
-            // 게임 페이지로 이동
-            window.location.href = 'game.html';
+            location.href = 'game.html';
         }
     </script>
 </body>
