@@ -3,358 +3,498 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>진믹스 - 게임</title>
+    <title>진믹스 - 이상형 찾기</title>
     <style>
-        /* 기본 레이아웃 */
-        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; background-color: #f0f0f0; margin: 0; }
-        .container { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; width: 100%; box-sizing: border-box; }
-        
-        /* 🔴 카운터 강조 */
-        .counter-section {
-            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
-            color: white;
-            padding: 12px 15px;
+        body {
+            font-family: Arial, sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 10px; background-color: #f0f0f0; margin: 0;
+        }
+        .container {
+            background: white; padding: 15px; border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 500px; width: 100%; box-sizing: border-box;
+        }
+
+        /* ─── 목표 카드 ─── */
+        .target-card {
+            background: linear-gradient(135deg, #f1f8e9, #e8f5e9);
+            border: 2px solid #66bb6a;
             border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.3);
+            padding: 14px;
+            margin-bottom: 14px;
+            position: sticky; top: 10px; z-index: 100;
+            box-shadow: 0 3px 10px rgba(102,187,106,0.2);
         }
-        
-        .counter-section.almost-there {
-            background: linear-gradient(135deg, #1F7A4D 0%, #2e7d32 100%);
-            animation: pulse 1.5s ease-in-out infinite;
+        .target-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px;
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        .target-header-label {
+            font-size: 13px; font-weight: bold; color: #1F7A4D;
+            display: flex; align-items: center; gap: 5px;
         }
-        
-        .counter-text {
-            font-size: 13px;
-            margin-bottom: 5px;
-            opacity: 0.9;
+        .turn-badge {
+            background: #1F7A4D; color: white;
+            padding: 3px 10px; border-radius: 10px;
+            font-size: 13px; font-weight: bold;
         }
-        
-        .counter-number {
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 1px;
+        .turn-badge.urgent { background: #e53935; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+        /* 말풍선 */
+        .target-body { display: flex; align-items: flex-start; gap: 10px; }
+        .requester-icon {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: #e8f5e9; border: 2px solid #a5d6a7;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
         }
-        
-        /* 캐릭터 표시 (Mask 방식) */
-        .character-container { position: relative; width: 90px; height: 90px; margin: 10px auto; background-color: transparent !important; }
+        .speech-bubble {
+            background: white; border: 1.5px solid #a5d6a7;
+            border-radius: 12px 12px 12px 4px;
+            padding: 9px 12px; flex: 1;
+            font-size: 13px; color: #333; line-height: 1.8;
+            position: relative;
+        }
+
+        /* 형질 태그 */
+        .trait-tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .trait-tag {
+            display: flex; align-items: center; gap: 5px;
+            background: white; border: 1.5px solid #ddd;
+            border-radius: 20px; padding: 4px 10px 4px 6px;
+            font-size: 12px; color: #555;
+            transition: all 0.3s;
+        }
+        .trait-tag.matched {
+            background: #e8f5e9; border-color: #66bb6a;
+            color: #1F7A4D; font-weight: bold;
+        }
+        .trait-tag.not-matched { background: #fff3f3; border-color: #ef9a9a; color: #c62828; }
+
+        /* 진행 바 */
+        .progress-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .progress-label { font-size: 12px; color: #666; white-space: nowrap; }
+        .progress-dots { display: flex; gap: 3px; flex: 1; }
+        .pdot { flex: 1; height: 7px; border-radius: 4px; background: #e0e0e0; transition: background 0.3s; }
+        .pdot.used   { background: #66bb6a; }
+        .pdot.urgent { background: #ef9a9a; }
+
+        /* ─── 캐릭터 ─── */
+        .character-container {
+            position: relative; width: 90px; height: 90px;
+            margin: 5px auto; background-color: transparent !important;
+        }
         .part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .body, .head {
             -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
-            mask-size: contain; mask-repeat: no-repeat; mask-position: center;
-            z-index: 1;
+            mask-size: contain; mask-repeat: no-repeat; mask-position: center; z-index: 1;
         }
         .head { z-index: 2; }
         .eyes { z-index: 3; object-fit: contain; }
 
-        /* UI 요소 */
-        .my-character-section { text-align: center; margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; }
-        .characters-row { display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .partners-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .partner-card { padding: 10px; border: 2px solid #ddd; border-radius: 10px; text-align: center; cursor: pointer; background: white; }
-        .partner-card.selected { border-color: #1F7A4D; background: #E4EBE7; }
-        .partner-container { position: relative; width: 60px; height: 60px; margin: 5px auto; background: transparent !important; }
-        button { padding: 10px 16px; margin: 5px; cursor: pointer; border-radius: 5px; border: none; background: #4CAF50; color: white; font-size: 14px; }
+        .my-character-section {
+            text-align: center; margin-bottom: 14px;
+            padding: 12px; background: #f9f9f9; border-radius: 10px;
+        }
+        .characters-row { display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+        /* 매치 상태 칩 */
+        .match-status-row {
+            display: flex; gap: 6px; justify-content: center;
+            margin-top: 8px; flex-wrap: wrap;
+        }
+        .match-chip {
+            font-size: 12px; padding: 3px 10px;
+            border-radius: 12px; border: 1px solid #ddd;
+            background: #f0f0f0; color: #999;
+        }
+        .match-chip.ok   { background: #e8f5e9; color: #1F7A4D; border-color: #a5d6a7; font-weight: bold; }
+        .match-chip.fail { background: #fff3f3; color: #e53935; border-color: #ef9a9a; }
+
+        /* ─── 배우자 ─── */
+        .partners-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 10px; margin-top: 10px;
+        }
+        .partner-card {
+            padding: 10px; border: 2px solid #ddd; border-radius: 10px;
+            text-align: center; cursor: pointer; background: white;
+            transition: all 0.2s;
+        }
+        .partner-card.selected { border-color: #1F7A4D; background: #f1f8f4; }
+        .partner-container {
+            position: relative; width: 60px; height: 60px;
+            margin: 5px auto; background: transparent !important;
+        }
+
+        button {
+            padding: 10px 16px; margin: 5px; cursor: pointer;
+            border-radius: 5px; border: none;
+            background: #4CAF50; color: white; font-size: 14px;
+        }
         button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
         .breed-button { background: #1F7A4D; width: 100%; font-size: 16px; margin-top: 10px; }
         .breed-button:disabled { background: #ccc; }
-        #loadingOverlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 2000; align-items: center; justify-content: center; font-size: 20px; }
+
+        .selected-partner-wrap {
+            position: relative; width: 90px; height: 90px;
+            border: 3px dashed #1F7A4D; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; box-sizing: border-box;
+        }
+
+        #loadingOverlay {
+            display: flex; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.93); z-index: 2000;
+            align-items: center; justify-content: center; font-size: 20px;
+        }
     </style>
 </head>
 <body>
     <div id="loadingOverlay">🔄 이미지 로딩 중...</div>
-    
+
     <div class="container">
-        <!-- 🔴 카운터 섹션 (가장 상단에 강조) -->
-        <div class="counter-section" id="counterSection">
-            <div class="counter-text">현재 진행상황</div>
-            <div class="counter-number"><span id="currentCount">1</span> / 10번째 아가</div>
+
+        <!-- 🎯 목표 카드 (항상 표시) -->
+        <div class="target-card">
+            <div class="target-header">
+                <div class="target-header-label">🔍 이상형을 찾아주세요!</div>
+                <div class="turn-badge" id="turnBadge">남은 턴: 10</div>
+            </div>
+
+            <div class="target-body">
+                <div class="requester-icon">👽</div>
+                <div class="speech-bubble" id="speechBubble">로딩 중...</div>
+            </div>
+
+            <!-- 형질 태그 (매치 여부 실시간 표시) -->
+            <div class="trait-tags" id="traitTags"></div>
+
+            <!-- 진행 바 -->
+            <div class="progress-row">
+                <div class="progress-label" id="progressLabel">0 / 10턴</div>
+                <div class="progress-dots" id="progressDots"></div>
+            </div>
         </div>
 
+        <!-- 👶 내 캐릭터 -->
         <div class="my-character-section">
-            <div id="nameDisplay" onclick="changeName()" style="font-size:20px; font-weight:bold; cursor:pointer; color:#2e7d32; margin-bottom: 10px;">이름 없음</div>
+            <div id="nameDisplay" onclick="changeName()"
+                 style="font-size:15px;font-weight:bold;cursor:pointer;color:#2e7d32;margin-bottom:8px;">
+                이름 없음
+            </div>
             <div class="characters-row">
-                <div class="character-container" id="myCharacter">
+                <div class="character-container">
                     <div class="part body" id="myBodyPart"></div>
                     <div class="part head" id="myHeadPart"></div>
                     <img class="part eyes" id="myEyesPart">
                 </div>
-                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png" width="40" alt="하트">
-                <div class="character-container" id="selectedPartnerDisplay" style="border: 3px dashed #1F7A4D; display:flex; align-items:center; justify-content:center;">
-                    <span style="color:#999; text-align: center; line-height: 1.4;">배우자<br>미선택</span>
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Two%20hearts/3D/two_hearts_3d.png"
+                     width="35" alt="하트">
+                <div class="selected-partner-wrap" id="selectedPartnerDisplay">
+                    <span style="color:#999;text-align:center;line-height:1.4;font-size:12px;">배우자<br>미선택</span>
                 </div>
             </div>
-            <div class="info" style="margin-top: 10px;">세대: <span id="generation">1</span></div>
+            <div class="match-status-row" id="matchStatusRow"></div>
+            <div style="margin-top:6px;font-size:12px;color:#888;">
+                세대: <span id="generation">1</span>
+            </div>
         </div>
 
-        <div class="partners-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
-                <h2 style="font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Yellow%20heart/3D/yellow_heart_3d.png" width="24" style="vertical-align: middle;">
+        <!-- 💑 배우자 선택 -->
+        <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;">
+                <h2 style="font-size:15px;margin:0;display:flex;align-items:center;gap:6px;">
+                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Yellow%20heart/3D/yellow_heart_3d.png"
+                         width="20" style="vertical-align:middle;">
                     배우자 후보
                 </h2>
             </div>
             <div class="partners-grid" id="partnersGrid"></div>
-            <button class="breed-button" id="breedButton" onclick="breed()" disabled>👶 교배하기</button>
+            <button class="breed-button" id="breedButton" onclick="breed()" disabled>
+                👶 교배하기
+            </button>
         </div>
     </div>
 
     <script>
-        // 🔥 자동 확장 가능한 유전자 시스템
+        // ─── 유전자 설정 ───
         const GENE_CONFIG = {
-            body: { folder: 'images', prefix: 'body_', count: null },
-            head: { folder: 'images', prefix: 'head_', count: null },
-            eyes: { folder: 'images', prefix: 'eyes_', count: null }
+            body:  { folder: 'images', prefix: 'body_',  count: null },
+            head:  { folder: 'images', prefix: 'head_',  count: null },
+            eyes:  { folder: 'images', prefix: 'eyes_',  count: null }
         };
-        
-        const COLORS = ['#ffd2d2', '#c1e2bd', '#bcdff1', '#a0a0a0', '#b1bf62', '#ebebeb', '#91b5e8', '#ffe39c', '#c3eada', '#edff59', '#ffc4c4'];
+        const COLORS = ['#ffd2d2','#c1e2bd','#bcdff1','#a0a0a0','#b1bf62','#ebebeb','#91b5e8','#ffe39c','#c3eada','#edff59','#ffc4c4'];
+        const TRAIT_NAMES = { body:'몸', head:'머리', eyes:'눈', color:'색깔' };
 
         let GENES = {};
-        let myGenes = {};
-        let myName = "초대 국왕 - 아가1";
-        let generation = 1;
-        let babyCounter = 2;
-        let familyTree = [];
-        let partners = [];
-        let selectedPartnerIndex = null;
-        let inheritanceStats = { body: {}, head: {}, eyes: {}, color: {} }; // 유전 통계
+        let myGenes = {}, myName = "아가1", generation = 1, babyCounter = 2;
+        let familyTree = [], partners = [], selectedPartnerIndex = null;
+        let inheritanceStats = { body:{}, head:{}, eyes:{}, color:{} };
 
+        // ─── 목표 시스템 ───
+        let targetGenes = {};
+        let targetTraits = [];   // 랜덤 선택된 2개 형질
+        let dialogueType = 0;    // 0: "갖춘", 1: "이상형"
+        const MAX_TURNS = 10;
+        let turnCount = 0;
+
+        // ─── 이미지 자동 감지 ───
         async function detectImageCount(folder, prefix) {
             let count = 0;
             while (true) {
-                const testPath = `${folder}/${prefix}${count}.png`;
                 try {
-                    const response = await fetch(testPath, { method: 'HEAD' });
-                    if (response.ok) {
-                        count++;
-                    } else {
-                        break;
-                    }
-                } catch {
-                    break;
-                }
+                    const res = await fetch(`${folder}/${prefix}${count}.png`, { method: 'HEAD' });
+                    if (res.ok) count++; else break;
+                } catch { break; }
             }
             return count;
         }
 
         async function initializeGenes() {
-            for (const [part, config] of Object.entries(GENE_CONFIG)) {
-                const count = await detectImageCount(config.folder, config.prefix);
-                config.count = count;
-                GENES[part] = Array.from({length: count}, (_, i) => `${config.folder}/${config.prefix}${i}.png`);
-                console.log(`✅ ${part}: ${count}개 이미지 감지됨`);
+            for (const [part, cfg] of Object.entries(GENE_CONFIG)) {
+                cfg.count = await detectImageCount(cfg.folder, cfg.prefix);
+                GENES[part] = Array.from({ length: cfg.count }, (_, i) => `${cfg.folder}/${cfg.prefix}${i}.png`);
             }
             GENE_CONFIG.color = { count: COLORS.length };
         }
 
-        window.onload = async function() {
+        // ─── 목표 생성 ───
+        function generateTarget() {
+            targetGenes = randomGenes();
+            // 4가지 형질 중 2개 랜덤 선택
+            const pool = ['body', 'head', 'eyes', 'color'];
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            targetTraits = pool.slice(0, 2);
+            dialogueType = Math.floor(Math.random() * 2);
+        }
+
+        // ─── 형질 시각 표현 (인라인 HTML) ───
+        function traitVisual(trait, value, size = 26) {
+            if (trait === 'eyes') {
+                return `<img src="images/eyes_${value}.png"
+                         style="width:${size}px;height:${size}px;object-fit:contain;vertical-align:middle;
+                                border-radius:4px;border:1px solid #eee;">`;
+            }
+            if (trait === 'color') {
+                return `<span style="display:inline-block;width:${size}px;height:${size}px;
+                         background:${COLORS[value]};border-radius:50%;
+                         border:2px solid rgba(0,0,0,0.12);vertical-align:middle;"></span>`;
+            }
+            // body / head — mask 방식
+            return `<span style="display:inline-block;width:${size}px;height:${size}px;
+                     -webkit-mask-image:url('images/${trait}_${value}.png');
+                     mask-image:url('images/${trait}_${value}.png');
+                     -webkit-mask-size:contain;mask-size:contain;
+                     -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+                     -webkit-mask-position:center;mask-position:center;
+                     background-color:#1F7A4D;vertical-align:middle;"></span>`;
+        }
+
+        // ─── 목표 UI 전체 업데이트 ───
+        function updateTargetUI() {
+            const v1 = traitVisual(targetTraits[0], targetGenes[targetTraits[0]], 26);
+            const v2 = traitVisual(targetTraits[1], targetGenes[targetTraits[1]], 26);
+
+            const text = dialogueType === 0
+                ? `${v1}&nbsp;와&nbsp;${v2}&nbsp;을 갖춘<br>멋진 외계인을 찾고 있어요!`
+                : `${v1}&nbsp;와&nbsp;${v2}&nbsp;이 제 이상형이에요.<br>소개시켜 주실 수 있나요?&nbsp;🙏`;
+            document.getElementById('speechBubble').innerHTML = text;
+
+            // 형질 태그 (조건 + 매치 여부)
+            const tagsHTML = targetTraits.map(trait => {
+                const vis = traitVisual(trait, targetGenes[trait], 22);
+                const isFirst = generation > 1;
+                const matched = isFirst && myGenes[trait] === targetGenes[trait];
+                const cls = !isFirst ? '' : (matched ? 'matched' : 'not-matched');
+                const suffix = !isFirst ? '' : (matched ? ' ✓' : ' ✗');
+                return `<div class="trait-tag ${cls}">${vis}<span>${TRAIT_NAMES[trait]}${suffix}</span></div>`;
+            }).join('');
+            document.getElementById('traitTags').innerHTML = tagsHTML;
+
+            // 남은 턴 배지
+            const rem = MAX_TURNS - turnCount;
+            const badge = document.getElementById('turnBadge');
+            badge.textContent = `남은 턴: ${rem}`;
+            badge.className = 'turn-badge' + (rem <= 3 ? ' urgent' : '');
+
+            // 진행 점
+            document.getElementById('progressLabel').textContent = `${turnCount} / ${MAX_TURNS}턴`;
+            const dots = Array.from({ length: MAX_TURNS }, (_, i) => {
+                const cls = i < turnCount ? (i >= 7 ? 'pdot urgent' : 'pdot used') : 'pdot';
+                return `<div class="${cls}"></div>`;
+            }).join('');
+            document.getElementById('progressDots').innerHTML = dots;
+        }
+
+        // ─── 매치 상태 칩 ───
+        function updateMatchStatus() {
+            if (generation === 1) {
+                document.getElementById('matchStatusRow').innerHTML = '';
+                return;
+            }
+            const html = targetTraits.map(t => {
+                const ok = myGenes[t] === targetGenes[t];
+                return `<span class="match-chip ${ok ? 'ok' : 'fail'}">${TRAIT_NAMES[t]} ${ok ? '✓' : '✗'}</span>`;
+            }).join('');
+            document.getElementById('matchStatusRow').innerHTML = html;
+        }
+
+        // ─── 초기화 ───
+        window.onload = async function () {
             try {
                 await initializeGenes();
-                
-                if (Object.values(GENE_CONFIG).some(c => c.count === 0)) {
-                    alert("⚠️ 일부 이미지 파일이 없습니다. images 폴더를 확인해주세요.");
+                if (['body','head','eyes'].some(p => GENE_CONFIG[p].count === 0)) {
+                    alert('⚠️ 이미지 파일이 없습니다. images 폴더를 확인해주세요.');
                 }
-                
+                generateTarget();
                 myGenes = randomGenes();
-                familyTree.push({ name: myName, genes: {...myGenes}, generation: 1, parents: null });
+                familyTree.push({ name: myName, genes: { ...myGenes }, generation: 1, parents: null });
                 displayMyCharacter();
+                updateTargetUI();
+                updateMatchStatus();
                 generatePartners();
-                updateCounter();
-                
                 document.getElementById('loadingOverlay').style.display = 'none';
-            } catch (error) {
-                console.error("초기화 실패:", error);
-                alert("❌ 게임 초기화에 실패했습니다.");
+            } catch (e) {
+                console.error(e);
+                alert('❌ 초기화 실패. images 폴더를 확인하세요.');
             }
         };
 
-        function updateCounter() {
-            const currentCount = generation;
-            document.getElementById('currentCount').textContent = currentCount;
-            
-            // 9번째 아가일 때 색상 변경
-            if (currentCount === 9) {
-                document.getElementById('counterSection').classList.add('almost-there');
-            }
-        }
-
+        // ─── 캐릭터 표시 ───
         function displayMyCharacter() {
             const color = COLORS[myGenes.color];
             const body = document.getElementById('myBodyPart');
             body.style.webkitMaskImage = `url('${GENES.body[myGenes.body]}')`;
-            body.style.maskImage = `url('${GENES.body[myGenes.body]}')`;
+            body.style.maskImage       = `url('${GENES.body[myGenes.body]}')`;
             body.style.backgroundColor = color;
-
             const head = document.getElementById('myHeadPart');
             head.style.webkitMaskImage = `url('${GENES.head[myGenes.head]}')`;
-            head.style.maskImage = `url('${GENES.head[myGenes.head]}')`;
+            head.style.maskImage       = `url('${GENES.head[myGenes.head]}')`;
             head.style.backgroundColor = color;
-
             document.getElementById('myEyesPart').src = GENES.eyes[myGenes.eyes];
             document.getElementById('nameDisplay').textContent = myName;
             document.getElementById('generation').textContent = generation;
         }
 
         function getCharacterHTML(genes) {
-            const color = COLORS[genes.color];
+            const c = COLORS[genes.color];
             return `
-                <div class="part body" style="-webkit-mask-image: url('${GENES.body[genes.body]}'); mask-image: url('${GENES.body[genes.body]}'); background-color: ${color};"></div>
-                <div class="part head" style="-webkit-mask-image: url('${GENES.head[genes.head]}'); mask-image: url('${GENES.head[genes.head]}'); background-color: ${color};"></div>
-                <img src="${GENES.eyes[genes.eyes]}" class="part eyes">
-            `;
+                <div class="part body" style="-webkit-mask-image:url('${GENES.body[genes.body]}');mask-image:url('${GENES.body[genes.body]}');background-color:${c};"></div>
+                <div class="part head" style="-webkit-mask-image:url('${GENES.head[genes.head]}');mask-image:url('${GENES.head[genes.head]}');background-color:${c};"></div>
+                <img src="${GENES.eyes[genes.eyes]}" class="part eyes">`;
         }
 
+        // ─── 매치 확인 ───
+        function checkMatch(genes) {
+            return targetTraits.every(t => genes[t] === targetGenes[t]);
+        }
+
+        // ─── 교배 ───
         function breed() {
-            if (selectedPartnerIndex === null || selectedPartnerIndex === undefined) {
-                alert("❌ 배우자를 먼저 선택해주세요!");
-                return;
-            }
-            
-            if (!partners[selectedPartnerIndex]) {
-                alert("❌ 유효한 배우자를 선택해주세요!");
-                return;
-            }
+            if (selectedPartnerIndex === null) { alert('❌ 배우자를 먼저 선택해주세요!'); return; }
 
             const pGenes = partners[selectedPartnerIndex];
-            const currentFamily = familyTree[familyTree.length - 1];
-            
-            const grandparents = currentFamily.parents ? [currentFamily.parents.p1.genes, currentFamily.parents.p2.genes] : null;
-            let greatGrandparents = null;
+            const cur = familyTree[familyTree.length - 1];
+            const grandparents = cur.parents ? [cur.parents.p1.genes, cur.parents.p2.genes] : null;
+            let greatGP = null;
             if (familyTree.length >= 2) {
-                const parentGen = familyTree[familyTree.length - 2];
-                if (parentGen.parents) greatGrandparents = [parentGen.parents.p1.genes, parentGen.parents.p2.genes];
+                const pg = familyTree[familyTree.length - 2];
+                if (pg.parents) greatGP = [pg.parents.p1.genes, pg.parents.p2.genes];
             }
 
             const childGenes = {};
-            const messages = [];
+            const msgs = [];
 
-            const partToKorean = (part) => {
-                const partNames = { body: '몸', head: '머리', eyes: '눈', color: '색깔' };
-                return partNames[part] || part;
-            };
+            ['body','head','eyes','color'].forEach(part => {
+                const maxVal = part === 'color' ? GENE_CONFIG.color.count : GENE_CONFIG[part].count;
+                const r = Math.random() * 100;
 
-            ['body', 'head', 'eyes', 'color'].forEach(part => {
-                const maxValue = part === 'color' ? GENE_CONFIG.color.count : GENE_CONFIG[part].count;
-                const rand = Math.random() * 100;
-                const partKR = partToKorean(part);
-                
-                if (rand < 88) {
+                if (r < 88) {
                     childGenes[part] = Math.random() < 0.5 ? myGenes[part] : pGenes[part];
-                    // 유전 통계 기록
-                    const key = childGenes[part];
-                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
-                } else if (rand < 94 && grandparents) {
+                } else if (r < 94 && grandparents) {
                     childGenes[part] = grandparents[Math.floor(Math.random() * 2)][part];
-                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                        messages.push(`👴👵 할아버지 할머니의 ${partKR} 유전!`);
-                    }
-                    const key = childGenes[part];
-                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
-                } else if (rand < 96 && greatGrandparents) {
-                    childGenes[part] = greatGrandparents[Math.floor(Math.random() * 2)][part];
-                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                        messages.push(`👵👴 증조할아버지 증조할머니의 ${partKR} 유전!`);
-                    }
-                    const key = childGenes[part];
-                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
-                } else if (rand < 97) {
-                    let greatGreatGrandparents = null;
+                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part])
+                        msgs.push(`👴👵 할아버지 할머니의 ${TRAIT_NAMES[part]} 유전!`);
+                } else if (r < 96 && greatGP) {
+                    childGenes[part] = greatGP[Math.floor(Math.random() * 2)][part];
+                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part])
+                        msgs.push(`👵👴 증조부모의 ${TRAIT_NAMES[part]} 유전!`);
+                } else if (r < 97) {
+                    let ggGP = null;
                     if (familyTree.length >= 3) {
-                        const ggParentGen = familyTree[familyTree.length - 3];
-                        if (ggParentGen.parents) greatGreatGrandparents = [ggParentGen.parents.p1.genes, ggParentGen.parents.p2.genes];
+                        const g3 = familyTree[familyTree.length - 3];
+                        if (g3.parents) ggGP = [g3.parents.p1.genes, g3.parents.p2.genes];
                     }
-                    
-                    if (greatGreatGrandparents) {
-                        childGenes[part] = greatGreatGrandparents[Math.floor(Math.random() * 2)][part];
-                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                            messages.push(`🎩 무려 고조할아버지 고조할머니의 ${partKR} 유전!`);
-                        }
+                    if (ggGP) {
+                        childGenes[part] = ggGP[Math.floor(Math.random() * 2)][part];
+                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part])
+                            msgs.push(`🎩 고조부모의 ${TRAIT_NAMES[part]} 유전!`);
                     } else {
-                        childGenes[part] = Math.floor(Math.random() * maxValue);
-                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                            messages.push(`✨ ${partKR} 돌연변이 발생!`);
-                        }
+                        childGenes[part] = Math.floor(Math.random() * maxVal);
+                        if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part])
+                            msgs.push(`✨ ${TRAIT_NAMES[part]} 돌연변이!`);
                     }
-                    const key = childGenes[part];
-                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
                 } else {
-                    childGenes[part] = Math.floor(Math.random() * maxValue);
-                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part]) {
-                        messages.push(`✨ ${partKR} 돌연변이 발생!`);
-                    }
-                    const key = childGenes[part];
-                    inheritanceStats[part][key] = (inheritanceStats[part][key] || 0) + 1;
+                    childGenes[part] = Math.floor(Math.random() * maxVal);
+                    if (childGenes[part] !== myGenes[part] && childGenes[part] !== pGenes[part])
+                        msgs.push(`✨ ${TRAIT_NAMES[part]} 돌연변이!`);
                 }
+                inheritanceStats[part][childGenes[part]] = (inheritanceStats[part][childGenes[part]] || 0) + 1;
             });
 
-            const isIdenticalToMe = ['body', 'head', 'eyes', 'color'].every(part => childGenes[part] === myGenes[part]);
-            const isIdenticalToPartner = ['body', 'head', 'eyes', 'color'].every(part => childGenes[part] === pGenes[part]);
-            
-            if (isIdenticalToMe) {
-                messages.unshift(`💕 나와 똑 닮았네!`);
-            } else if (isIdenticalToPartner) {
-                messages.unshift(`💕 배우자와 똑 닮았네!`);
-            }
-
-            const oldName = myName;
-            const oldGenes = {...myGenes};
+            const oldName = myName, oldGenes = { ...myGenes };
             myGenes = childGenes;
-            myName = `아가${babyCounter}`;
-            babyCounter++;
+            myName = `아가${babyCounter++}`;
             generation++;
+            turnCount++;
 
             familyTree.push({
-                name: myName,
-                genes: {...myGenes},
-                generation: generation,
-                parents: { 
-                    p1: { name: oldName, genes: oldGenes }, 
-                    p2: { name: "배우자", genes: {...pGenes} } 
-                }
+                name: myName, genes: { ...myGenes }, generation,
+                parents: { p1: { name: oldName, genes: oldGenes }, p2: { name: '배우자', genes: { ...pGenes } } }
             });
 
-            // 🔴 10번째 아가 체크
-            if (generation === 10) {
-                // 게임 데이터 저장
-                const gameData = {
-                    finalBaby: { name: myName, genes: {...myGenes} },
-                    familyTree: familyTree,
-                    inheritanceStats: inheritanceStats
-                };
-                localStorage.setItem('jinmix_gameData', JSON.stringify(gameData));
-                
-                // 결과 페이지로 이동
-                setTimeout(() => {
-                    window.location.href = 'result.html';
-                }, 1000);
-                
-                alert("🎉 축하합니다! 10번째 아가를 데려왔어요!");
+            const isMatch    = checkMatch(myGenes);
+            const isLastTurn = turnCount >= MAX_TURNS;
+
+            if (isMatch || isLastTurn) {
+                localStorage.setItem('jinmix_gameData', JSON.stringify({
+                    targetGenes, targetTraits, dialogueType,
+                    finalGenes: { ...myGenes }, finalName: myName,
+                    success: isMatch, successTurn: isMatch ? turnCount : null,
+                    totalTurns: turnCount, familyTree, inheritanceStats
+                }));
+                if (msgs.length) alert([...new Set(msgs)].join('\n'));
+                alert(isMatch
+                    ? `🎉 ${turnCount}번째 시도에 성공! 이상형을 찾았어요!`
+                    : '😢 10턴이 모두 끝났어요... 결과를 확인해봐요!');
+                window.location.href = 'result.html';
                 return;
             }
 
-            if (messages.length > 0) alert([...new Set(messages)].join('\n'));
+            if (msgs.length) alert([...new Set(msgs)].join('\n'));
             displayMyCharacter();
+            updateTargetUI();
+            updateMatchStatus();
             generatePartners();
-            updateCounter();
         }
 
+        // ─── 배우자 생성 ───
         function generatePartners() {
-            partners = Array.from({length: 4}, () => randomGenes());
+            partners = Array.from({ length: 4 }, () => randomGenes());
             selectedPartnerIndex = null;
-            
             const grid = document.getElementById('partnersGrid');
             grid.innerHTML = '';
-            
             document.getElementById('breedButton').disabled = true;
-            document.getElementById('selectedPartnerDisplay').innerHTML = '<span style="color:#999; text-align: center; line-height: 1.4;">배우자<br>미선택</span>';
-            document.getElementById('selectedPartnerDisplay').style.border = '3px dashed #1F7A4D';
-            
+            document.getElementById('selectedPartnerDisplay').innerHTML =
+                '<span style="color:#999;text-align:center;line-height:1.4;font-size:12px;">배우자<br>미선택</span>';
+
             partners.forEach((p, i) => {
                 const card = document.createElement('div');
                 card.className = 'partner-card';
@@ -365,27 +505,24 @@
                     document.querySelectorAll('.partner-card').forEach(c => c.classList.remove('selected'));
                     card.classList.add('selected');
                 };
-                card.innerHTML = `<div class="partner-container">${getCharacterHTML(p)}</div><div style="font-size: 12px;">후보 ${i+1}</div>`;
+                card.innerHTML = `<div class="partner-container">${getCharacterHTML(p)}</div>
+                                  <div style="font-size:12px;color:#666;margin-top:3px;">후보 ${i + 1}</div>`;
                 grid.appendChild(card);
             });
         }
 
         function randomGenes() {
-            return { 
-                body: Math.floor(Math.random() * GENE_CONFIG.body.count), 
-                head: Math.floor(Math.random() * GENE_CONFIG.head.count), 
-                eyes: Math.floor(Math.random() * GENE_CONFIG.eyes.count), 
-                color: Math.floor(Math.random() * GENE_CONFIG.color.count) 
+            return {
+                body:  Math.floor(Math.random() * GENE_CONFIG.body.count),
+                head:  Math.floor(Math.random() * GENE_CONFIG.head.count),
+                eyes:  Math.floor(Math.random() * GENE_CONFIG.eyes.count),
+                color: Math.floor(Math.random() * GENE_CONFIG.color.count)
             };
         }
 
-        function changeName() { 
-            const n = prompt("이름을 입력하세요", myName); 
-            if(n) { 
-                myName = n; 
-                familyTree[familyTree.length - 1].name = n;
-                displayMyCharacter(); 
-            } 
+        function changeName() {
+            const n = prompt('이름을 입력하세요', myName);
+            if (n) { myName = n; familyTree[familyTree.length - 1].name = n; displayMyCharacter(); }
         }
     </script>
 </body>
