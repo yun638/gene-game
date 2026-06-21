@@ -148,16 +148,16 @@
                 :`<span style="font-size:32px;">👽</span>`;
 
             const dv0=tv(targetTraits[0],targetGenes[targetTraits[0]],20), dv1=tv(targetTraits[1],targetGenes[targetTraits[1]],20);
-            const dialogueTxt=dialogueType===0?`${dv0}&nbsp;와&nbsp;${dv1}&nbsp;을 갖춘 외계인을 찾고 있었어요`:`${dv0}&nbsp;와&nbsp;${dv1}&nbsp;이 제 이상형이에요`;
+            const dialogueTxt=dialogueType===0?`${dv0}&nbsp;와&nbsp;${dv1}&nbsp;을 갖춘 외계인을 수출하고 싶었어요`:`${dv0}&nbsp;와&nbsp;${dv1}&nbsp;이면 수출 OK예요`;
 
             const checksHTML=targetTraits.map(t=>{
                 const ok=finalGenes[t]===targetGenes[t];
-                return `<li class="${ok?'ok':'fail'}">${ok?'✅':'❌'}${tv(t,targetGenes[t],18)}<span>${TRAIT_NAMES[t]}${ok?' 충족':' 미충족'}</span></li>`;
+                return `<li class="${ok?'ok':'fail'}">${ok?'✅':'❌'}${tv(t,targetGenes[t],18)}<span>${TRAIT_NAMES[t]}${ok?' 충족':' 조건 미달'}</span></li>`;
             }).join('');
 
             const nameSectionHTML=success?`
                 <div class="name-section" id="nameSection">
-                    <p>이 아가에게 이름을 지어주세요 💕</p>
+                    <p>수출된 외계인에게 이름을 지어주세요 💕</p>
                     <input type="text" id="babyNameInput" placeholder="이름 입력" maxlength="10">
                     <button onclick="confirmName()">✅</button>
                 </div>`:'';
@@ -165,7 +165,7 @@
             document.getElementById('resultContainer').innerHTML=`
                 <div class="banner">
                     <span class="banner-emoji">${success?'🎉':'😢'}</span>
-                    <div class="banner-title ${success?'success':'fail'}">${success?`${successTurn}번째 시도에 성공!`:'이번엔 아쉽게...'}</div>
+                    <div class="banner-title ${success?'success':'fail'}">${success?`${successTurn}번째 시도에 수출 성공! 🚀`:'수출 조건 미달...'}</div>
                     ${success?'<div style="font-size:13px;color:#b8860b;background:#fff9e6;border-radius:10px;padding:4px 12px;display:inline-block;margin-top:5px;font-weight:bold;">💰 골드 +1 획득!</div>':''}
                 </div>
 
@@ -173,7 +173,7 @@
 
                 <div class="compare-row">
                     <div class="compare-card target-c">
-                        <div class="compare-label">🎯 목표 조건</div>
+                        <div class="compare-label">🚀 수출 조건</div>
                         <ul class="check-list">${checksHTML}</ul>
                     </div>
                     <div class="compare-card ${success?'matched':''}">
