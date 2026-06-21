@@ -101,7 +101,7 @@
 
         window.onload=function(){
             const raw=localStorage.getItem('jinmix_gameData');
-            if(!raw){alert('게임 데이터가 없습니다.');location.href='index.html';return;}
+            if(!raw){location.href='index.html';return;}
             gameData=JSON.parse(raw);
             document.body.className=gameData.success?'success-bg':'fail-bg';
             renderResult();
